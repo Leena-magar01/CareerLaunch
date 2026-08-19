@@ -43,6 +43,24 @@ export const MentorDashboard: React.FC = () => {
     fetchMentorData();
   }, []);
 
+  const handleRespondAssignment = async (asgId: string, response: 'ACCEPTED' | 'REJECTED') => {
+    try {
+      const remarks = response === 'REJECTED' ? prompt('Please enter reason for declining mentorship:') : undefined;
+      if (response === 'REJECTED' && !remarks) return;
+
+      const res = await api.post(`/mentors/assignments/${asgId}/respond`, {
+        response,
+        remarks: remarks || undefined
+      });
+      if (res.data.success) {
+        setMsg(`Mentorship assignment ${response.toLowerCase()}!`);
+        fetchMentorData();
+      }
+    } catch (e: any) {
+      setMsg(e.response?.data?.error?.message || 'Failed to update assignment status');
+    }
+  };
+
   const handleReviewReport = async (repId: string, status: 'APPROVED' | 'CHANGES_REQUIRED') => {
     try {
       const res = await api.patch(`/reports/${repId}/review`, {
@@ -148,8 +166,32 @@ export const MentorDashboard: React.FC = () => {
               <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-xs space-y-1">
                 <span className="text-slate-500 block text-[10px]">Internship Vacancy:</span>
                 <span className="font-bold text-slate-200 block">{asg.internship?.title}</span>
-                <span className="text-cyan-400">{asg.internship?.company?.name}</span>
+                <span className="text-cyan-400">{asg.internship?.company?.name} &bull; {asg.internship?.location}</span>
               </div>
+
+              {asg.status === 'ASSIGNED' && (
+                <div className="flex items-center gap-2 pt-2 border-t border-slate-800">
+                  <button
+                    onClick={() => handleRespondAssignment(asg.id, 'ACCEPTED')}
+                    className="flex-1 btn-primary text-xs py-1.5 bg-emerald-600 hover:bg-emerald-500 font-semibold"
+                  >
+                    Accept Mentorship
+                  </button>
+                  <button
+                    onClick={() => handleRespondAssignment(asg.id, 'REJECTED')}
+                    className="btn-secondary text-xs py-1.5 px-3 hover:text-rose-400"
+                  >
+                    Decline
+                  </button>
+                </div>
+              )}
+
+              {asg.status === 'ACCEPTED' && (
+                <div className="p-2 bg-emerald-950/20 border border-emerald-500/30 rounded-lg text-[11px] text-emerald-300 flex items-center justify-between">
+                  <span>✓ Mentorship Active</span>
+                  <span>Assigned: {new Date(asg.assignedAt).toLocaleDateString()}</span>
+                </div>
+              )}
             </div>
           ))}
         </div>

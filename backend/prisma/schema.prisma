@@ -37,8 +37,15 @@ model StudentProfile {
   cgpa               Float
   backlogs           Int      @default(0)
   bio                String?
+  phone              String?
+  address            String?
   linkedinUrl        String?
   githubUrl          String?
+  portfolioUrl       String?
+  resumeDocumentId   String?
+  preferredDomains   String?  // JSON array string e.g. ["Web Development", "AI/ML"]
+  preferredMode      String?  @default("ANY") // REMOTE, HYBRID, ON_SITE, ANY
+  preferredLocations String?  // JSON array string e.g. ["Pune", "Bangalore"]
   profileStatus      String   @default("DRAFT") // DRAFT, SUBMITTED, UNDER_REVIEW, VERIFIED, REJECTED, CORRECTION_REQUIRED
   verificationRemark String?
   createdAt          DateTime @default(now())
@@ -47,6 +54,7 @@ model StudentProfile {
   skills            StudentSkill[]
   certifications    Certification[]
   projects          Project[]
+  experiences       Experience[]
   applications      Application[]
   mentorAssignments MentorAssignment[]
   progressReports   ProgressReport[]
@@ -54,6 +62,10 @@ model StudentProfile {
   evaluations       Evaluation[]
   completions       Completion[]
   ppos              PPO[]
+
+  @@index([department])
+  @@index([profileStatus])
+  @@index([passingYear])
 }
 
 model StudentSkill {
@@ -63,6 +75,9 @@ model StudentSkill {
   skillName   String
   proficiency String?        // BEGINNER, INTERMEDIATE, ADVANCED
   evidence    String?
+
+  @@index([studentId])
+  @@index([skillName])
 }
 
 model Certification {
@@ -74,6 +89,8 @@ model Certification {
   issueDate  String?
   expiryDate String?
   documentId String?
+
+  @@index([studentId])
 }
 
 model Project {
@@ -84,6 +101,23 @@ model Project {
   description  String
   technologies String         // JSON string or CSV
   projectUrl   String?
+
+  @@index([studentId])
+}
+
+model Experience {
+  id          String         @id @default(uuid())
+  studentId   String
+  student     StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  company     String
+  role        String
+  description String?
+  startDate   String?
+  endDate     String?
+  isCurrent   Boolean        @default(false)
+  location    String?
+
+  @@index([studentId])
 }
 
 model CompanyProfile {
@@ -94,6 +128,8 @@ model CompanyProfile {
   website            String?
   industry           String?
   description        String?
+  location           String?
+  phone              String?
   contactName        String
   contactEmail       String
   verificationStatus String   @default("VERIFIED") // PENDING, VERIFIED, REJECTED
@@ -102,6 +138,8 @@ model CompanyProfile {
 
   internships Internship[]
   ppos        PPO[]
+
+  @@index([verificationStatus])
 }
 
 model MentorProfile {
@@ -119,6 +157,8 @@ model MentorProfile {
   progressReports ProgressReport[]
   issues          Issue[]
   evaluations     Evaluation[]
+
+  @@index([department])
 }
 
 model Internship {
@@ -134,13 +174,15 @@ model Internship {
   vacancies          Int
   deadline           String
   startDate          String?
-  status             String         @default("OPEN") // DRAFT, PUBLISHED, OPEN, CLOSED, ARCHIVED
+  status             String         @default("OPEN") // DRAFT, PUBLISHED, OPEN, PAUSED, CLOSED, ARCHIVED
   minCgpa            Float          @default(0.0)
   maxBacklogs        Int            @default(0)
   allowedBranches    String         // JSON array string e.g. ["CSE","IT"]
   passingYears       String         // JSON array string e.g. [2026, 2027]
   requiredSkills     String         // JSON array string e.g. ["Java","SQL"]
   requiredExperience Int            @default(0)
+  responsibilities   String?
+  requirements       String?
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
 
@@ -151,6 +193,11 @@ model Internship {
   evaluations       Evaluation[]
   completions       Completion[]
   ppos              PPO[]
+
+  @@index([companyId])
+  @@index([status])
+  @@index([mode])
+  @@index([createdAt])
 }
 
 model Application {
@@ -169,12 +216,22 @@ model Application {
   offer Offer?
 
   @@unique([internshipId, studentId])
+  @@index([internshipId])
+  @@index([studentId])
+  @@index([status])
+  @@index([appliedAt])
 }
 
 model Offer {
   id                 String      @id @default(uuid())
   applicationId      String      @unique
   application        Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  role               String?
+  startDate          String?
+  endDate            String?
+  stipend            Float?
+  location           String?
+  terms              String?
   documentId         String?
   issuedAt           DateTime    @default(now())
   acceptanceDeadline String?
@@ -183,17 +240,24 @@ model Offer {
   verificationCode   String      @unique @default(uuid())
   createdAt          DateTime    @default(now())
   updatedAt          DateTime    @updatedAt
+
+  @@index([applicationId])
+  @@index([status])
 }
 
 model Verification {
   id         String    @id @default(uuid())
-  entityType String    // PROFILE, OFFER, COMPLETION, DOCUMENT
+  entityType String    // PROFILE, OFFER, COMPLETION, DOCUMENT, PPO
   entityId   String
   verifierId String?
   status     String    @default("PENDING") // PENDING, APPROVED, REJECTED, CORRECTION_REQUIRED
   reason     String?
   reviewedAt DateTime?
   createdAt  DateTime  @default(now())
+
+  @@index([entityType, entityId])
+  @@index([status])
+  @@index([verifierId])
 }
 
 model MentorAssignment {
@@ -205,44 +269,76 @@ model MentorAssignment {
   mentorId     String
   mentor       MentorProfile  @relation(fields: [mentorId], references: [id], onDelete: Cascade)
   assignedBy   String
-  status       String         @default("ACTIVE") // ASSIGNED, ACCEPTED, ACTIVE, COMPLETED
+  status       String         @default("ASSIGNED") // ASSIGNED, ACCEPTED, REJECTED, REASSIGNED, ACTIVE, COMPLETED
   assignedAt   DateTime       @default(now())
   acceptedAt   DateTime?
+  rejectedAt   DateTime?
+  reassignedAt DateTime?
+  remarks      String?
+
+  @@index([mentorId])
+  @@index([studentId])
+  @@index([internshipId])
+  @@index([status])
 }
 
 model ProgressReport {
-  id           String         @id @default(uuid())
-  internshipId String
-  internship   Internship     @relation(fields: [internshipId], references: [id], onDelete: Cascade)
-  studentId    String
-  student      StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  mentorId     String?
-  mentor       MentorProfile? @relation(fields: [mentorId], references: [id], onDelete: SetNull)
-  weekNumber   Int
-  submittedAt  DateTime       @default(now())
-  tasks        String
-  learning     String
-  challenges   String
-  hours        Float          @default(40.0)
-  status       String         @default("SUBMITTED") // SUBMITTED, APPROVED, CHANGES_REQUIRED
-  feedback     String?
-  reviewedAt   DateTime?
+  id                     String         @id @default(uuid())
+  internshipId           String
+  internship             Internship     @relation(fields: [internshipId], references: [id], onDelete: Cascade)
+  studentId              String
+  student                StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  mentorId               String?
+  mentor                 MentorProfile? @relation(fields: [mentorId], references: [id], onDelete: SetNull)
+  weekNumber             Int
+  startDate              String?
+  endDate                String?
+  tasks                  String
+  learning               String
+  challenges             String
+  hours                  Float          @default(40.0)
+  documentId             String?
+  status                 String         @default("SUBMITTED") // SUBMITTED, APPROVED, CHANGES_REQUIRED
+  feedback               String?
+  reviewedAt             DateTime?
+  taskVerificationStatus String?        @default("PENDING") // PENDING, VERIFIED, NEEDS_REVISION
+  companyFeedback        String?
+  companyReviewedAt      DateTime?
+  submittedAt            DateTime       @default(now())
+  updatedAt              DateTime       @default(now()) @updatedAt
+
+  @@index([internshipId])
+  @@index([studentId])
+  @@index([mentorId])
+  @@index([status])
+  @@index([weekNumber])
 }
 
 model Issue {
-  id           String         @id @default(uuid())
+  id           String          @id @default(uuid())
   internshipId String
-  internship   Internship     @relation(fields: [internshipId], references: [id], onDelete: Cascade)
+  internship   Internship      @relation(fields: [internshipId], references: [id], onDelete: Cascade)
   studentId    String
-  student      StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  mentorId     String
-  mentor       MentorProfile  @relation(fields: [mentorId], references: [id], onDelete: Cascade)
-  severity     String         @default("NEEDS_ATTENTION") // ON_TRACK, NEEDS_ATTENTION, CRITICAL
+  student      StudentProfile  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  mentorId     String?
+  mentor       MentorProfile?  @relation(fields: [mentorId], references: [id], onDelete: SetNull)
+  raisedBy     String?
+  priority     String          @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  severity     String          @default("NEEDS_ATTENTION") // ON_TRACK, NEEDS_ATTENTION, CRITICAL
   title        String
   description  String
-  status       String         @default("OPEN") // OPEN, RESOLVED
-  createdAt    DateTime       @default(now())
+  assignedTo   String?
+  status       String          @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED, CLOSED
+  resolution   String?
   resolvedAt   DateTime?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @default(now()) @updatedAt
+
+  @@index([internshipId])
+  @@index([studentId])
+  @@index([mentorId])
+  @@index([status])
+  @@index([priority])
 }
 
 model Evaluation {
@@ -258,11 +354,20 @@ model Evaluation {
   communicationScore   Float
   professionalismScore Float
   teamworkScore        Float
+  disciplineScore      Float          @default(8.0)
+  taskCompletionScore  Float          @default(8.0)
   overallScore         Float
   comments             String?
+  feedbackSummary      String?
+  criteriaBreakdown    String?
   submittedAt          DateTime       @default(now())
+  updatedAt            DateTime       @default(now()) @updatedAt
   mentorProfileId      String?
   mentor               MentorProfile? @relation(fields: [mentorProfileId], references: [id])
+
+  @@index([internshipId])
+  @@index([studentId])
+  @@index([evaluatorRole])
 }
 
 model Document {
@@ -278,46 +383,85 @@ model Document {
   size         Int
   status       String   @default("UPLOADED") // UPLOADED, UNDER_REVIEW, VERIFIED, REJECTED, CORRECTION_REQUIRED
   uploadedAt   DateTime @default(now())
+
+  @@index([ownerUserId])
+  @@index([entityType, entityId])
+  @@index([documentType])
 }
 
 model Completion {
-  id                    String    @id @default(uuid())
+  id                    String         @id @default(uuid())
   internshipId          String
-  internship            Internship @relation(fields: [internshipId], references: [id], onDelete: Cascade)
+  internship            Internship     @relation(fields: [internshipId], references: [id], onDelete: Cascade)
   studentId             String
   student               StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  certificateId         String?        @unique
+  verificationCode      String?        @unique
   certificateDocumentId String?
-  verifiedBy            String?
+  recommendedBy         String?        // MENTOR, COMPANY
+  recommendationRemarks String?
+  rejectionReason       String?
+  finalScore            Float?
+  grade                 String?
+  verifiedBy            String?        // T&P Officer user ID
   verifiedAt            DateTime?
-  status                String    @default("PENDING") // PENDING, APPROVED, REJECTED
-  createdAt             DateTime  @default(now())
+  completionDate        DateTime?
+  status                String         @default("RECOMMENDED") // RECOMMENDED, PENDING, APPROVED, REJECTED
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @default(now()) @updatedAt
+
+  @@index([internshipId])
+  @@index([studentId])
+  @@index([status])
 }
 
 model PPO {
-  id           String         @id @default(uuid())
-  internshipId String
-  internship   Internship     @relation(fields: [internshipId], references: [id], onDelete: Cascade)
-  studentId    String
-  student      StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  companyId    String
-  company      CompanyProfile @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  status       String         @default("UNDER_CONSIDERATION") // NOT_APPLICABLE, UNDER_CONSIDERATION, OFFERED, DECLINED, ACCEPTED
-  role         String?
-  offeredCtc   Float?
-  offerDate    String?
-  documentId   String?
-  updatedAt    DateTime       @updatedAt
+  id                  String         @id @default(uuid())
+  internshipId        String
+  internship          Internship     @relation(fields: [internshipId], references: [id], onDelete: Cascade)
+  studentId           String
+  student             StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  companyId           String
+  company             CompanyProfile @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  status              String         @default("UNDER_CONSIDERATION") // NOT_OFFERED, UNDER_CONSIDERATION, OFFERED, DECLINED, ACCEPTED
+  role                String?
+  offeredCtc          Float?
+  offerDate           String?
+  joiningDate         String?
+  location            String?
+  terms               String?
+  documentId          String?
+  isVerified          Boolean        @default(false)
+  verifiedBy          String?        // T&P Officer user ID
+  verifiedAt          DateTime?
+  verificationRemarks String?
+  studentResponseDate DateTime?
+  studentRemarks      String?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @default(now()) @updatedAt
+
+  @@index([internshipId])
+  @@index([studentId])
+  @@index([companyId])
+  @@index([status])
 }
 
 model Notification {
   id        String    @id @default(uuid())
   userId    String
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type      String
+  type      String    // REGISTRATION, VERIFICATION, ELIGIBILITY, APPLICATION, SHORTLIST, SELECTION, OFFER, TNP_APPROVAL, MENTOR_ASSIGNMENT, WEEKLY_REPORT, FEEDBACK, ISSUE, EVALUATION, COMPLETION, CERTIFICATE, PPO
   title     String
   message   String
+  dataJson  String?
+  channel   String    @default("IN_APP") // IN_APP, EMAIL, SMS, PUSH
+  isRead    Boolean   @default(false)
   readAt    DateTime?
   createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
 }
 
 model AuditLog {
@@ -331,4 +475,9 @@ model AuditLog {
   newDataJson String?
   reason      String?
   createdAt   DateTime @default(now())
+
+  @@index([actorId])
+  @@index([action])
+  @@index([entityType])
+  @@index([createdAt])
 }

@@ -21,9 +21,13 @@ import documentRoutes from './routes/document';
 import analyticsRoutes from './routes/analytics';
 import aiRoutes from './routes/ai';
 import verifyRoutes from './routes/verify';
+import notificationRoutes from './routes/notifications';
+import auditRoutes from './routes/audit';
+import { securityHeaders } from './middleware/security';
 
 const app = express();
 
+app.use(securityHeaders);
 app.use(cors());
 app.use(express.json());
 app.use(requestLogger);
@@ -45,11 +49,15 @@ app.use('/api/v1/internships', progressRoutes);
 app.use('/api/v1', progressRoutes);
 app.use('/api/v1/internships', evaluationRoutes);
 app.use('/api/v1/internships', completionRoutes);
+app.use('/api/v1', completionRoutes);
+app.use('/api/v1/internships', ppoRoutes);
 app.use('/api/v1', ppoRoutes);
 app.use('/api/v1/documents', documentRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
 app.use('/api/v1/ai', aiRoutes);
 app.use('/api/v1/verify', verifyRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
+app.use('/api/v1/tnp/audit-logs', auditRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {

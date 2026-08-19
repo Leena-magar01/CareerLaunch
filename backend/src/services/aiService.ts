@@ -15,15 +15,20 @@ export interface CandidateMatchingInput {
     fullName: string;
     department: string;
     cgpa: number;
+    backlogs?: number;
     skills: string[];
-    projects: { title: string; technologies: string; description: string }[];
-    certifications: string[];
+    projects?: { title: string; technologies?: string | null; description?: string | null }[];
+    experiences?: { company: string; role: string; description?: string | null }[] | number;
+    certifications?: string[];
+    preferredDomains?: string[] | string;
+    preferredMode?: string;
   };
   internship: {
     title: string;
     description: string;
     requiredSkills: string[];
     minCgpa: number;
+    mode?: string;
   };
 }
 
@@ -31,67 +36,145 @@ export interface CandidateMatchResult {
   matchScore: number;
   factors: {
     skillMatch: number;
-    projectMatch: number;
+    domainMatch: number;
     academicFit: number;
-    certFit: number;
+    experienceMatch: number;
+    projectMatch: number;
   };
   explanation: string;
 }
 
+/**
+ * Helper to parse arrays from potential JSON or CSV strings
+ */
+function toArray(val: any): string[] {
+  if (Array.isArray(val)) return val.map(s => String(s).trim()).filter(Boolean);
+  if (typeof val === 'string' && val.trim().length > 0) {
+    try {
+      const parsed = JSON.parse(val);
+      if (Array.isArray(parsed)) return parsed.map(s => String(s).trim()).filter(Boolean);
+    } catch {
+      return val.split(',').map(s => s.trim()).filter(Boolean);
+    }
+  }
+  return [];
+}
+
+/**
+ * Explainable Candidate Match Scoring Engine
+ * 
+ * Computes deterministic multi-factor match score across 5 explicit dimensions:
+ * 1. Skills Match (35%)
+ * 2. Domain & Mode Preference Match (20%)
+ * 3. Academic Profile & CGPA Fit (20%)
+ * 4. Past Work & Internship Experience (15%)
+ * 5. Practical Project Stack Relevance (10%)
+ * 
+ * Optionally synthesizes qualitative insights via Gemini LLM when API key is provided.
+ */
 export const calculateCandidateMatch = async (input: CandidateMatchingInput): Promise<CandidateMatchResult> => {
   const { student, internship } = input;
 
-  // 1. Skill overlap calculation (40%)
-  const reqSkills = internship.requiredSkills.map(s => s.toLowerCase().trim());
-  const studentSkills = student.skills.map(s => s.toLowerCase().trim());
+  // 1. Skill overlap calculation (35%)
+  const reqSkills = (internship.requiredSkills || []).map(s => s.toLowerCase().trim()).filter(Boolean);
+  const studentSkills = (student.skills || []).map(s => s.toLowerCase().trim()).filter(Boolean);
+
   let matchedSkillsCount = 0;
+  const matchedSkillNames: string[] = [];
+  const missingSkillNames: string[] = [];
+
   reqSkills.forEach(req => {
-    if (studentSkills.some(st => st.includes(req) || req.includes(st))) {
+    const isMatched = studentSkills.some(st => st.includes(req) || req.includes(st));
+    if (isMatched) {
       matchedSkillsCount++;
+      matchedSkillNames.push(req);
+    } else {
+      missingSkillNames.push(req);
     }
   });
-  const skillMatch = reqSkills.length > 0 ? Math.min(100, Math.round((matchedSkillsCount / reqSkills.length) * 100)) : 100;
 
-  // 2. Project relevance calculation (25%)
-  let projectMatch = 50; // base score
-  const allProjectText = student.projects.map(p => `${p.title} ${p.technologies} ${p.description}`).join(' ').toLowerCase();
-  let projectSkillMatches = 0;
-  reqSkills.forEach(req => {
-    if (allProjectText.includes(req)) projectSkillMatches++;
-  });
-  if (student.projects.length > 0) {
-    projectMatch = Math.min(100, Math.round((projectSkillMatches / Math.max(1, reqSkills.length)) * 100 + 40));
+  const skillMatch = reqSkills.length > 0
+    ? Math.min(100, Math.round((matchedSkillsCount / reqSkills.length) * 100))
+    : (studentSkills.length > 0 ? 90 : 70);
+
+  // 2. Domain & Mode Preference Match (20%)
+  const studentDomains = toArray(student.preferredDomains).map(d => d.toLowerCase());
+  const internshipContext = `${internship.title} ${internship.description}`.toLowerCase();
+
+  let domainMatch = 70; // baseline if no domain preference set
+  if (studentDomains.length > 0) {
+    const domainHits = studentDomains.filter(d => internshipContext.includes(d)).length;
+    if (domainHits > 0) {
+      domainMatch = Math.min(100, 80 + domainHits * 10);
+    } else {
+      domainMatch = 60;
+    }
   }
 
-  // 3. Academic fit (20%)
-  const cgpaMargin = student.cgpa - internship.minCgpa;
-  const academicFit = Math.min(100, Math.max(60, Math.round(80 + cgpaMargin * 10)));
+  // Work Mode bonus/penalty
+  if (student.preferredMode && internship.mode) {
+    const sMode = student.preferredMode.toUpperCase();
+    const iMode = internship.mode.toUpperCase();
+    if (sMode === 'ANY' || sMode === iMode) {
+      domainMatch = Math.min(100, domainMatch + 10);
+    }
+  }
 
-  // 4. Certification fit (15%)
-  const certFit = student.certifications.length > 0 ? 90 : 60;
+  // 3. Academic Profile Fit (20%)
+  const cgpaMargin = (student.cgpa || 0) - (internship.minCgpa || 0);
+  let academicFit = 75;
+  if (cgpaMargin >= 1.5) academicFit = 100;
+  else if (cgpaMargin >= 0.5) academicFit = 90;
+  else if (cgpaMargin >= 0) academicFit = 80;
+  else academicFit = Math.max(40, Math.round(70 + cgpaMargin * 20));
 
-  // Weighted Score
-  const matchScore = Math.round(
-    skillMatch * 0.40 +
-    projectMatch * 0.25 +
+  if ((student.backlogs || 0) > 0) {
+    academicFit = Math.max(30, academicFit - (student.backlogs || 0) * 15);
+  }
+
+  // 4. Past Work & Internship Experience Match (15%)
+  let experienceCount = 0;
+  if (Array.isArray(student.experiences)) {
+    experienceCount = student.experiences.length;
+  } else if (typeof student.experiences === 'number') {
+    experienceCount = student.experiences;
+  }
+
+  let experienceMatch = 50;
+  if (experienceCount >= 2) experienceMatch = 100;
+  else if (experienceCount === 1) experienceMatch = 85;
+  else experienceMatch = 60;
+
+  // 5. Project Relevance Match (10%)
+  const studentProjects = student.projects || [];
+  let projectMatch = 50;
+  if (studentProjects.length > 0) {
+    const projectAllText = studentProjects.map(p => `${p.title} ${p.technologies || ''} ${p.description || ''}`).join(' ').toLowerCase();
+    const projectSkillHits = reqSkills.filter(req => projectAllText.includes(req)).length;
+    projectMatch = Math.min(100, Math.round((projectSkillHits / Math.max(1, reqSkills.length)) * 50 + 50));
+  }
+
+  // Overall Weighted Score
+  const matchScore = Math.min(100, Math.max(0, Math.round(
+    skillMatch * 0.35 +
+    domainMatch * 0.20 +
     academicFit * 0.20 +
-    certFit * 0.15
-  );
+    experienceMatch * 0.15 +
+    projectMatch * 0.10
+  )));
 
-  // Fallback text explanation
-  let explanation = `Candidate has ${matchedSkillsCount}/${reqSkills.length} required skills (${student.skills.join(', ')}). `;
-  if (student.projects.length > 0) {
-    explanation += `Demonstrated ${student.projects.length} practical projects. `;
-  }
-  explanation += `Academic CGPA ${student.cgpa} exceeds minimum required ${internship.minCgpa}.`;
+  // Explainable Human-Readable Explanation
+  let explanation = `Skill Match: ${skillMatch}% (${matchedSkillsCount}/${reqSkills.length} required skills matched). ` +
+    `Domain Fit: ${domainMatch}%. ` +
+    `Academic Profile: ${academicFit}% (CGPA ${student.cgpa.toFixed(2)} vs Min ${internship.minCgpa.toFixed(2)}). ` +
+    `Experience: ${experienceMatch}% (${experienceCount} prior experiences).`;
 
-  // Try LLM Explanation if key is present
+  // Optional Gemini LLM qualitative synthesis
   if (aiClient) {
     try {
       const model = aiClient.getGenerativeModel({ model: 'gemini-1.5-flash' });
-      const response = await model.generateContent(
-        `Provide a concise 2-sentence match explanation for why candidate ${student.fullName} (CGPA ${student.cgpa}, Skills: ${student.skills.join(', ')}) fits the role "${internship.title}" (Required skills: ${internship.requiredSkills.join(', ')}). Calculated match score is ${matchScore}%.`
-      );
+      const prompt = `Provide a concise 2-sentence match explanation for why candidate ${student.fullName} (CGPA ${student.cgpa}, Skills: ${student.skills.join(', ')}) fits the role "${internship.title}" (Required skills: ${internship.requiredSkills.join(', ')}). Calculated match score is ${matchScore}%. Highlight key strengths.`;
+      const response = await model.generateContent(prompt);
       const text = response.response.text();
       if (text) {
         explanation = text.trim();
@@ -105,9 +188,10 @@ export const calculateCandidateMatch = async (input: CandidateMatchingInput): Pr
     matchScore,
     factors: {
       skillMatch,
-      projectMatch,
+      domainMatch,
       academicFit,
-      certFit,
+      experienceMatch,
+      projectMatch,
     },
     explanation,
   };

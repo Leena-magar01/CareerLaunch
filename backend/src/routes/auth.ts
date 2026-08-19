@@ -4,19 +4,74 @@ import jwt from 'jsonwebtoken';
 import { prisma } from '../config/db';
 import { ENV } from '../config/env';
 import { authenticateJwt, AuthRequest } from '../middleware/auth';
+import { calculateProfileCompleteness } from '../services/studentProfileService';
 
 const router = Router();
 
 // POST /api/v1/auth/register
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, role, fullName, studentCode, department, passingYear, companyName, mentorTitle } = req.body;
+    const {
+      email,
+      password,
+      role,
+      fullName,
+      studentCode,
+      department,
+      passingYear,
+      cgpa,
+      backlogs,
+      bio,
+      phone,
+      linkedinUrl,
+      githubUrl,
+      portfolioUrl,
+      preferredDomains,
+      preferredMode,
+      preferredLocations,
+      skills,
+      companyName,
+      industry,
+      location,
+      website,
+      description,
+      mentorTitle
+    } = req.body;
 
     if (!email || !password || !role) {
-      return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Email, password and role are required' } });
+      return res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: 'Email, password and role are required' }
+      });
     }
 
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: 'Invalid email address format' }
+      });
+    }
+
+    // Password length validation
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: 'Password must be at least 6 characters long' }
+      });
+    }
+
+    // Allowed roles
+    const allowedRoles = ['STUDENT', 'COMPANY', 'TNP', 'MENTOR', 'ADMIN'];
+    if (!allowedRoles.includes(role)) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: `Invalid role. Must be one of: ${allowedRoles.join(', ')}` }
+      });
+    }
+
+    const existingUser = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
     if (existingUser) {
       return res.status(409).json({ success: false, error: { code: 'USER_EXISTS', message: 'Email already registered' } });
     }
@@ -25,37 +80,78 @@ router.post('/register', async (req, res) => {
 
     const user = await prisma.user.create({
       data: {
-        email,
+        email: email.toLowerCase(),
         passwordHash,
         role,
         status: 'ACTIVE'
       }
     });
 
+    let profileData: any = null;
+
     // Create role profile
     if (role === 'STUDENT') {
-      await prisma.studentProfile.create({
+      const parsedCgpa = cgpa !== undefined ? parseFloat(cgpa) : 8.0;
+      const parsedBacklogs = backlogs !== undefined ? parseInt(backlogs) : 0;
+      const parsedYear = passingYear !== undefined ? parseInt(passingYear) : 2026;
+
+      const domainsStr = Array.isArray(preferredDomains) ? JSON.stringify(preferredDomains) : (preferredDomains || null);
+      const locsStr = Array.isArray(preferredLocations) ? JSON.stringify(preferredLocations) : (preferredLocations || null);
+
+      const studentProfile = await prisma.studentProfile.create({
         data: {
           userId: user.id,
           studentCode: studentCode || `STU-${Math.floor(100000 + Math.random() * 900000)}`,
           fullName: fullName || 'New Student',
           department: department || 'CSE',
-          passingYear: parseInt(passingYear) || 2026,
-          cgpa: 8.0,
-          backlogs: 0,
+          passingYear: isNaN(parsedYear) ? 2026 : parsedYear,
+          cgpa: isNaN(parsedCgpa) ? 8.0 : parsedCgpa,
+          backlogs: isNaN(parsedBacklogs) ? 0 : parsedBacklogs,
+          bio: bio || null,
+          phone: phone || null,
+          linkedinUrl: linkedinUrl || null,
+          githubUrl: githubUrl || null,
+          portfolioUrl: portfolioUrl || null,
+          preferredDomains: domainsStr,
+          preferredMode: preferredMode || 'ANY',
+          preferredLocations: locsStr,
         }
       });
+
+      // Add skills if provided at registration
+      if (Array.isArray(skills) && skills.length > 0) {
+        await prisma.studentSkill.createMany({
+          data: skills.map((s: any) => ({
+            studentId: studentProfile.id,
+            skillName: typeof s === 'string' ? s : s.skillName,
+            proficiency: typeof s === 'object' && s.proficiency ? s.proficiency : 'INTERMEDIATE'
+          })).filter(s => s.skillName && s.skillName.trim().length > 0)
+        });
+      }
+
+      const fullStudent = await prisma.studentProfile.findUnique({
+        where: { id: studentProfile.id },
+        include: { skills: true, projects: true, experiences: true, certifications: true }
+      });
+
+      const completeness = calculateProfileCompleteness(fullStudent, 0);
+      profileData = { ...fullStudent, completeness };
     } else if (role === 'COMPANY') {
-      await prisma.companyProfile.create({
+      profileData = await prisma.companyProfile.create({
         data: {
           userId: user.id,
           name: companyName || fullName || 'New Company Corp',
+          industry: industry || null,
+          location: location || null,
+          website: website || null,
+          phone: phone || null,
+          description: description || null,
           contactName: fullName || 'Company HR',
           contactEmail: email,
         }
       });
     } else if (role === 'MENTOR') {
-      await prisma.mentorProfile.create({
+      profileData = await prisma.mentorProfile.create({
         data: {
           userId: user.id,
           fullName: fullName || 'Faculty Mentor',
@@ -71,7 +167,12 @@ router.post('/register', async (req, res) => {
       success: true,
       data: {
         token,
-        user: { id: user.id, email: user.email, role: user.role }
+        user: {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          profile: profileData
+        }
       }
     });
   } catch (error: any) {
@@ -89,9 +190,11 @@ router.post('/login', async (req, res) => {
     }
 
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email: email.toLowerCase() },
       include: {
-        studentProfile: true,
+        studentProfile: {
+          include: { skills: true, projects: true, experiences: true, certifications: true }
+        },
         companyProfile: true,
         mentorProfile: true,
       }
@@ -109,9 +212,15 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, ENV.JWT_SECRET, { expiresIn: '7d' });
 
     let profileData: any = null;
-    if (user.role === 'STUDENT') profileData = user.studentProfile;
-    if (user.role === 'COMPANY') profileData = user.companyProfile;
-    if (user.role === 'MENTOR') profileData = user.mentorProfile;
+    if (user.role === 'STUDENT' && user.studentProfile) {
+      const docCount = await prisma.document.count({ where: { ownerUserId: user.id } });
+      const completeness = calculateProfileCompleteness(user.studentProfile, docCount);
+      profileData = { ...user.studentProfile, completeness };
+    } else if (user.role === 'COMPANY') {
+      profileData = user.companyProfile;
+    } else if (user.role === 'MENTOR') {
+      profileData = user.mentorProfile;
+    }
 
     return res.json({
       success: true,
@@ -138,7 +247,7 @@ router.get('/me', authenticateJwt, async (req: AuthRequest, res) => {
       where: { id: req.user!.id },
       include: {
         studentProfile: {
-          include: { skills: true, certifications: true, projects: true }
+          include: { skills: true, certifications: true, projects: true, experiences: true }
         },
         companyProfile: true,
         mentorProfile: true,
@@ -149,13 +258,20 @@ router.get('/me', authenticateJwt, async (req: AuthRequest, res) => {
       return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'User not found' } });
     }
 
+    let studentProfileWithCompleteness = user.studentProfile;
+    if (user.studentProfile) {
+      const docCount = await prisma.document.count({ where: { ownerUserId: user.id } });
+      const completeness = calculateProfileCompleteness(user.studentProfile, docCount);
+      studentProfileWithCompleteness = { ...user.studentProfile, completeness } as any;
+    }
+
     return res.json({
       success: true,
       data: {
         id: user.id,
         email: user.email,
         role: user.role,
-        studentProfile: user.studentProfile,
+        studentProfile: studentProfileWithCompleteness,
         companyProfile: user.companyProfile,
         mentorProfile: user.mentorProfile,
       }

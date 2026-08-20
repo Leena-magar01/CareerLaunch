@@ -1671,10 +1671,10 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
 
                       <p className="text-xs text-slate-400 line-clamp-2">{v.description}</p>
 
-                      <div className="grid grid-cols-3 gap-2 text-xs bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
-                        <div><span className="text-slate-500 block text-[10px]">Stipend</span> ₹{v.stipend?.toLocaleString()}/mo</div>
-                        <div><span className="text-slate-500 block text-[10px]">Duration</span> {v.durationMonths} Mos</div>
-                        <div><span className="text-slate-500 block text-[10px]">Location</span> {v.location || 'Flexible'}</div>
+                      <div className="grid grid-cols-3 gap-2 text-xs bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                        <div><span className="text-slate-500 block text-[10px] font-semibold uppercase">Stipend</span> <span className="text-slate-900 font-semibold">₹{v.stipend?.toLocaleString()}/mo</span></div>
+                        <div><span className="text-slate-500 block text-[10px] font-semibold uppercase">Duration</span> <span className="text-slate-900 font-semibold">{v.durationMonths} Mos</span></div>
+                        <div><span className="text-slate-500 block text-[10px] font-semibold uppercase">Location</span> <span className="text-slate-900 font-semibold">{v.location || 'Flexible'}</span></div>
                       </div>
 
                       {/* Required Skills */}
@@ -1693,18 +1693,18 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
 
                       {/* Explainable Match Score Badge */}
                       {match && item.isEligible && (
-                        <div className="p-2.5 bg-cyan-950/30 border border-cyan-500/30 rounded-xl space-y-1.5 text-xs">
+                        <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5 text-xs">
                           <div className="flex items-center justify-between">
-                            <span className="font-bold text-cyan-300 flex items-center space-x-1">
-                              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                            <span className="font-bold text-slate-900 flex items-center space-x-1">
+                              <Sparkles className="w-3.5 h-3.5 text-[#66A3BF]" />
                               <span>AI Match Score: {match.matchScore}%</span>
                             </span>
-                            <span className="text-[10px] text-cyan-400 font-semibold">
+                            <span className="text-[10px] text-slate-700 font-semibold">
                               Skills: {match.factors?.skillMatch}% | Domain: {match.factors?.domainMatch}%
                             </span>
                           </div>
                           {match.explanation && (
-                            <p className="text-[11px] text-slate-300 leading-snug">{match.explanation}</p>
+                            <p className="text-[11px] text-slate-700 leading-snug">{match.explanation}</p>
                           )}
                         </div>
                       )}

@@ -39,107 +39,107 @@ export const LoginPage: React.FC<LoginPageProps> = ({ initialRole = 'STUDENT', o
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center px-6 py-12">
+    <div className="min-h-screen bg-[#FCFCFC] text-[#243447] flex flex-col justify-center items-center px-6 py-12 font-sans relative">
       <button
         onClick={onNavigateHome}
-        className="fixed top-6 left-6 text-xs text-slate-400 hover:text-white flex items-center space-x-1.5 transition-colors"
+        className="fixed top-6 left-6 text-xs text-[#667085] hover:text-[#243447] flex items-center space-x-1.5 transition-colors font-medium"
       >
         <ArrowLeft className="w-4 h-4" />
         <span>Back to Home</span>
       </button>
 
-      <div className="w-full max-w-md space-y-8">
+      <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2">
-          <div className="inline-flex p-3 rounded-2xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 mb-2">
-            <GraduationCap className="w-8 h-8" />
+          <div className="inline-flex p-3.5 rounded-xl bg-[#E9F3FD] text-[#4874A0] border border-[#66A3BF]/30 mb-1">
+            <GraduationCap className="w-7 h-7 text-[#66A3BF]" />
           </div>
-          <h2 className="text-2xl font-bold text-white">Sign In to Platform</h2>
-          <p className="text-xs text-slate-400">Access your role-specific dashboard</p>
+          <h2 className="text-2xl font-bold text-[#243447] tracking-tight">Sign In to Platform</h2>
+          <p className="text-xs text-[#667085]">Access your institutional role dashboard</p>
         </div>
 
-        {/* One-Click Quick Demo Login Shortcuts */}
-        <div className="glass-card p-4 space-y-2">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-cyan-400 block text-center">
+        {/* 1-Click Quick Demo Login Shortcuts */}
+        <div className="card-base p-4 space-y-3 bg-white">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-[#4874A0] block text-center">
             ⚡ Quick Demo 1-Click Fill
           </span>
           <div className="grid grid-cols-2 gap-2 text-xs">
             <button
               onClick={() => fillDemoAccount('student@college.edu')}
-              className="p-2 rounded-xl bg-slate-900/80 hover:bg-cyan-950/40 border border-slate-700 hover:border-cyan-500/50 text-slate-300 text-left flex items-center space-x-2 transition-all"
+              className="p-2.5 rounded-lg bg-[#E9F3FD]/50 hover:bg-[#E9F3FD] border border-[#D8E2E6] hover:border-[#66A3BF] text-[#243447] text-left flex items-center space-x-2 transition-all"
             >
-              <GraduationCap className="w-4 h-4 text-cyan-400" />
-              <span>Student</span>
+              <GraduationCap className="w-4 h-4 text-[#66A3BF]" />
+              <span className="font-medium">Student</span>
             </button>
             <button
               onClick={() => fillDemoAccount('recruiter@techcorp.com')}
-              className="p-2 rounded-xl bg-slate-900/80 hover:bg-indigo-950/40 border border-slate-700 hover:border-indigo-500/50 text-slate-300 text-left flex items-center space-x-2 transition-all"
+              className="p-2.5 rounded-lg bg-[#E9F3FD]/50 hover:bg-[#E9F3FD] border border-[#D8E2E6] hover:border-[#66A3BF] text-[#243447] text-left flex items-center space-x-2 transition-all"
             >
-              <Building2 className="w-4 h-4 text-indigo-400" />
-              <span>Company</span>
+              <Building2 className="w-4 h-4 text-[#4874A0]" />
+              <span className="font-medium">Company</span>
             </button>
             <button
               onClick={() => fillDemoAccount('tnp@college.edu')}
-              className="p-2 rounded-xl bg-slate-900/80 hover:bg-amber-950/40 border border-slate-700 hover:border-amber-500/50 text-slate-300 text-left flex items-center space-x-2 transition-all"
+              className="p-2.5 rounded-lg bg-[#E9F3FD]/50 hover:bg-[#E9F3FD] border border-[#D8E2E6] hover:border-[#66A3BF] text-[#243447] text-left flex items-center space-x-2 transition-all"
             >
-              <ShieldCheck className="w-4 h-4 text-amber-400" />
-              <span>T&P Admin</span>
+              <ShieldCheck className="w-4 h-4 text-[#C9963E]" />
+              <span className="font-medium">T&P Admin</span>
             </button>
             <button
               onClick={() => fillDemoAccount('mentor@college.edu')}
-              className="p-2 rounded-xl bg-slate-900/80 hover:bg-emerald-950/40 border border-slate-700 hover:border-emerald-500/50 text-slate-300 text-left flex items-center space-x-2 transition-all"
+              className="p-2.5 rounded-lg bg-[#E9F3FD]/50 hover:bg-[#E9F3FD] border border-[#D8E2E6] hover:border-[#66A3BF] text-[#243447] text-left flex items-center space-x-2 transition-all"
             >
-              <UserCheck className="w-4 h-4 text-emerald-400" />
-              <span>Mentor</span>
+              <UserCheck className="w-4 h-4 text-[#4F8A68]" />
+              <span className="font-medium">Mentor</span>
             </button>
           </div>
         </div>
 
         {/* Login Form */}
-        <form onSubmit={handleSubmit} className="glass-card p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="card-base p-6 space-y-4 bg-white">
           {errorMsg && (
-            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs">
+            <div className="p-3 rounded-lg bg-[#C95A5A]/10 border border-[#C95A5A]/30 text-[#C95A5A] text-xs">
               {errorMsg}
             </div>
           )}
 
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-300">Email Address</label>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-[#243447]">Email Address</label>
             <div className="relative">
-              <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+              <Mail className="w-4 h-4 text-[#667085] absolute left-3 top-2.5" />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="user@domain.com"
-                className="w-full bg-slate-900 border border-slate-700 text-white rounded-xl pl-9 pr-4 py-2.5 text-xs focus:outline-none focus:border-cyan-500"
+                className="input-base text-xs !pl-9"
               />
             </div>
           </div>
 
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-300">Password</label>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-[#243447]">Password</label>
             <div className="relative">
-              <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+              <Lock className="w-4 h-4 text-[#667085] absolute left-3 top-2.5" />
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-slate-900 border border-slate-700 text-white rounded-xl pl-9 pr-4 py-2.5 text-xs focus:outline-none focus:border-cyan-500"
+                className="input-base text-xs !pl-9"
               />
             </div>
           </div>
 
-          <button type="submit" disabled={submitting} className="w-full btn-primary text-xs py-3 mt-2">
+          <button type="submit" disabled={submitting} className="w-full btn-primary text-xs py-2.5 mt-2">
             {submitting ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 
-        <p className="text-center text-xs text-slate-400">
+        <p className="text-center text-xs text-[#667085]">
           Don't have an account?{' '}
-          <button onClick={onNavigateRegister} className="text-cyan-400 font-semibold hover:underline">
+          <button onClick={onNavigateRegister} className="text-[#66A3BF] font-semibold hover:underline">
             Register here
           </button>
         </p>
@@ -147,3 +147,4 @@ export const LoginPage: React.FC<LoginPageProps> = ({ initialRole = 'STUDENT', o
     </div>
   );
 };
+

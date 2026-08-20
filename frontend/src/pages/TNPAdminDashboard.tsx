@@ -7,8 +7,25 @@ import {
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
-export const TNPAdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'students' | 'offers' | 'verifications' | 'mentors' | 'analytics' | 'ppo'>('students');
+interface TNPAdminDashboardProps {
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
+}
+
+export const TNPAdminDashboard: React.FC<TNPAdminDashboardProps> = ({
+  activeTab: externalActiveTab,
+  onTabChange
+}) => {
+  const [internalActiveTab, setInternalActiveTab] = useState<'students' | 'offers' | 'verifications' | 'mentors' | 'analytics' | 'ppo'>('verifications');
+
+  const activeTab = (externalActiveTab as any) || internalActiveTab;
+
+  const setActiveTab = (tab: any) => {
+    setInternalActiveTab(tab);
+    if (onTabChange) onTabChange(tab);
+  };
+
+
   const [verificationFilter, setVerificationFilter] = useState<string>('ALL');
 
   const [studentStats, setStudentStats] = useState<any>({ total: 0, verified: 0, pending: 0, rejected: 0, correctionRequired: 0 });

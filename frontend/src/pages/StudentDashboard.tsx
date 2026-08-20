@@ -9,8 +9,25 @@ import {
   UploadCloud, Trash2, ExternalLink, Check, X, AlertCircle, Eye, Download
 } from 'lucide-react';
 
-export const StudentDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'profile' | 'marketplace' | 'applications' | 'progress' | 'skillgap' | 'resume'>('profile');
+interface StudentDashboardProps {
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
+}
+
+export const StudentDashboard: React.FC<StudentDashboardProps> = ({
+  activeTab: externalActiveTab,
+  onTabChange
+}) => {
+  const [internalActiveTab, setInternalActiveTab] = useState<'profile' | 'marketplace' | 'applications' | 'progress' | 'skillgap' | 'resume'>('marketplace');
+
+  const activeTab = (externalActiveTab as any) || internalActiveTab;
+
+  const setActiveTab = (tab: any) => {
+    setInternalActiveTab(tab);
+    if (onTabChange) onTabChange(tab);
+  };
+
+
   const [profileTab, setProfileTab] = useState<'personal' | 'academic' | 'skills' | 'projects' | 'experience' | 'certifications' | 'preferences' | 'documents'>('personal');
   
   const [profile, setProfile] = useState<any>(null);

@@ -12,7 +12,8 @@ export const TNPShell: React.FC = () => {
       pageTitle="T&P Administration & Governance"
       pageSubtitle="Verify student profiles & offer letters, assign faculty mentors, and track university placement metrics."
     >
-      <TNPAdminDashboard />
+      <TNPAdminDashboard activeTab={activeItem} onTabChange={setActiveItem} />
     </DashboardLayout>
   );
 };
+

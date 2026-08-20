@@ -12,7 +12,8 @@ export const CompanyShell: React.FC = () => {
       pageTitle="Corporate Recruiter Workspace"
       pageSubtitle="Post internship vacancies, review AI-matched candidates, issue offers, and manage PPOs."
     >
-      <CompanyDashboard />
+      <CompanyDashboard activeTab={activeItem} onTabChange={setActiveItem} />
     </DashboardLayout>
   );
 };
+

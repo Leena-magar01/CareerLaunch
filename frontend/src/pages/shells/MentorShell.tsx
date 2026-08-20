@@ -12,7 +12,8 @@ export const MentorShell: React.FC = () => {
       pageTitle="Faculty Mentor Workspace"
       pageSubtitle="Guide assigned students, review weekly progress reports, flag progress concerns, and complete academic rubrics."
     >
-      <MentorDashboard />
+      <MentorDashboard activeTab={activeItem} onTabChange={setActiveItem} />
     </DashboardLayout>
   );
 };
+

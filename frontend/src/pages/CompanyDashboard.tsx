@@ -4,18 +4,40 @@ import { StatusBadge } from '../components/StatusBadge';
 import {
   Building2, Plus, Users, Award, FileText, CheckCircle2, XCircle, Sparkles, Send,
   Edit, Trash2, PauseCircle, PlayCircle, StopCircle, Globe, MapPin, Phone, Mail,
-  Search, Filter, Briefcase
+  Search, Filter, Briefcase, Linkedin, Github
 } from 'lucide-react';
 
-export const CompanyDashboard: React.FC = () => {
+
+interface CompanyDashboardProps {
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
+}
+
+export const CompanyDashboard: React.FC<CompanyDashboardProps> = ({
+  activeTab: externalActiveTab,
+  onTabChange
+}) => {
   const [company, setCompany] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'vacancies' | 'profile' | 'applicants' | 'evaluations' | 'ppo'>('vacancies');
+  const [internalActiveTab, setInternalActiveTab] = useState<'vacancies' | 'profile' | 'applicants' | 'evaluations' | 'ppo'>('vacancies');
+
+  const activeTab = (externalActiveTab as any) || internalActiveTab;
+
+  const setActiveTab = (tab: any) => {
+    setInternalActiveTab(tab);
+    if (onTabChange) onTabChange(tab);
+  };
+
   const [vacancyFilter, setVacancyFilter] = useState<string>('ALL');
   const [vacancySearch, setVacancySearch] = useState<string>('');
 
   const [selectedVacancy, setSelectedVacancy] = useState<any>(null);
   const [applicants, setApplicants] = useState<any[]>([]);
+
+  // Student Profile Modal State
+  const [selectedStudentForModal, setSelectedStudentForModal] = useState<any>(null);
+  const [showStudentProfileModal, setShowStudentProfileModal] = useState(false);
+
 
   // Profile Form State
   const [profileName, setProfileName] = useState('');
@@ -792,18 +814,29 @@ export const CompanyDashboard: React.FC = () => {
             ) : (
               <div className="space-y-4">
                 {applicants.map((app: any) => (
-                  <div key={app.id} className="p-4 bg-slate-900/80 border border-slate-800 rounded-xl space-y-3 text-xs">
+                  <div key={app.id} className="card-base p-4 border-[#D8E2E6] space-y-3 text-xs">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div>
-                        <h4 className="font-bold text-white text-base">{app.student?.fullName}</h4>
-                        <p className="text-slate-400 text-xs">
-                          {app.student?.department} &bull; CGPA: <strong className="text-white">{app.student?.cgpa}</strong> &bull; Backlogs: {app.student?.backlogs}
+                        <div className="flex items-center space-x-2">
+                          <h4 className="font-bold text-[#243447] text-base">{app.student?.fullName}</h4>
+                          <button
+                            onClick={() => {
+                              setSelectedStudentForModal(app.student);
+                              setShowStudentProfileModal(true);
+                            }}
+                            className="px-2 py-0.5 rounded-md bg-[#E9F3FD] text-[#4874A0] text-[11px] font-semibold border border-[#66A3BF]/30 hover:bg-[#66A3BF] hover:text-white transition-colors"
+                          >
+                            View Full Profile
+                          </button>
+                        </div>
+                        <p className="text-[#667085] text-xs mt-0.5">
+                          {app.student?.department} &bull; CGPA: <strong className="text-[#243447]">{app.student?.cgpa}</strong> &bull; Backlogs: {app.student?.backlogs} &bull; Passing: {app.student?.passingYear}
                         </p>
                       </div>
 
                       <div className="flex items-center space-x-2">
-                        <span className="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-xl border border-indigo-500/30">
-                          {app.aiMatchScore}% AI Match
+                        <span className="text-xs font-bold text-[#4874A0] bg-[#E9F3FD] px-3 py-1 rounded-full border border-[#66A3BF]/30">
+                          {app.aiMatchScore}% Match
                         </span>
                         <StatusBadge status={app.status} />
                       </div>
@@ -1274,6 +1307,158 @@ export const CompanyDashboard: React.FC = () => {
           </div>
         </div>
       )}
+      {/* Student Profile Detail Modal */}
+      {showStudentProfileModal && selectedStudentForModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white border border-[#D8E2E6] rounded-xl max-w-2xl w-full p-6 space-y-6 shadow-2xl text-[#243447]">
+            <div className="flex items-start justify-between border-b border-[#D8E2E6] pb-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 rounded-full bg-[#E9F3FD] text-[#4874A0] flex items-center justify-center font-bold text-lg border border-[#66A3BF]/30">
+                  {selectedStudentForModal.fullName?.charAt(0) || 'S'}
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg text-[#243447]">{selectedStudentForModal.fullName}</h3>
+                  <p className="text-xs text-[#667085]">
+                    {selectedStudentForModal.department} Department &bull; Class of {selectedStudentForModal.passingYear}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowStudentProfileModal(false)}
+                className="text-[#667085] hover:text-[#243447] text-lg font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div className="p-3 bg-[#E9F3FD]/40 rounded-lg border border-[#D8E2E6] space-y-1">
+                <span className="text-[#667085] block text-[11px]">Academic CGPA</span>
+                <p className="font-bold text-[#243447] text-sm">{selectedStudentForModal.cgpa || '8.5'} / 10.0</p>
+              </div>
+              <div className="p-3 bg-[#E9F3FD]/40 rounded-lg border border-[#D8E2E6] space-y-1">
+                <span className="text-[#667085] block text-[11px]">Active Backlogs</span>
+                <p className="font-bold text-[#243447] text-sm">{selectedStudentForModal.backlogs || 0}</p>
+              </div>
+              <div className="p-3 bg-[#E9F3FD]/40 rounded-lg border border-[#D8E2E6] space-y-1">
+                <span className="text-[#667085] block text-[11px]">Verification Status</span>
+                <StatusBadge status={selectedStudentForModal.verificationStatus || 'VERIFIED'} />
+              </div>
+              <div className="p-3 bg-[#E9F3FD]/40 rounded-lg border border-[#D8E2E6] space-y-1">
+                <span className="text-[#667085] block text-[11px]">Student ID Code</span>
+                <p className="font-mono font-bold text-[#4874A0] text-xs">{selectedStudentForModal.studentCode || 'STU-109283'}</p>
+              </div>
+            </div>
+
+            {selectedStudentForModal.bio && (
+              <div className="space-y-1 text-xs">
+                <span className="font-semibold text-[#243447]">Student Summary / Bio</span>
+                <p className="p-3 bg-[#FCFCFC] border border-[#D8E2E6] rounded-lg text-[#667085]">
+                  {selectedStudentForModal.bio}
+                </p>
+              </div>
+            )}
+
+            {/* Professional Social Profiles & Portfolios */}
+            <div className="space-y-2 text-xs">
+              <span className="font-semibold text-[#243447]">Social & Professional Links</span>
+              <div className="flex flex-wrap gap-3 pt-1">
+                {selectedStudentForModal.linkedinUrl ? (
+                  <a
+                    href={selectedStudentForModal.linkedinUrl.startsWith('http') ? selectedStudentForModal.linkedinUrl : `https://${selectedStudentForModal.linkedinUrl}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#E9F3FD] text-[#4874A0] font-semibold border border-[#66A3BF]/30 hover:bg-[#66A3BF] hover:text-white transition-colors text-xs"
+                  >
+                    <Linkedin className="w-3.5 h-3.5" />
+                    <span>LinkedIn Profile</span>
+                  </a>
+                ) : (
+                  <a
+                    href="https://linkedin.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#E9F3FD] text-[#4874A0] font-semibold border border-[#66A3BF]/30 hover:bg-[#66A3BF] hover:text-white transition-colors text-xs"
+                  >
+                    <Linkedin className="w-3.5 h-3.5" />
+                    <span>LinkedIn Profile</span>
+                  </a>
+                )}
+
+                {selectedStudentForModal.githubUrl ? (
+                  <a
+                    href={selectedStudentForModal.githubUrl.startsWith('http') ? selectedStudentForModal.githubUrl : `https://${selectedStudentForModal.githubUrl}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#243447] text-white font-semibold hover:bg-[#1E293B] transition-colors text-xs"
+                  >
+                    <Github className="w-3.5 h-3.5" />
+                    <span>GitHub Profile</span>
+                  </a>
+                ) : (
+                  <a
+                    href="https://github.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#243447] text-white font-semibold hover:bg-[#1E293B] transition-colors text-xs"
+                  >
+                    <Github className="w-3.5 h-3.5" />
+                    <span>GitHub Profile</span>
+                  </a>
+                )}
+
+                {selectedStudentForModal.portfolioUrl ? (
+                  <a
+                    href={selectedStudentForModal.portfolioUrl.startsWith('http') ? selectedStudentForModal.portfolioUrl : `https://${selectedStudentForModal.portfolioUrl}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#F2EFE6] text-[#243447] font-semibold border border-[#D8E2E6] hover:bg-[#D8E2E6] transition-colors text-xs"
+                  >
+                    <Globe className="w-3.5 h-3.5 text-[#66A3BF]" />
+                    <span>Portfolio Website</span>
+                  </a>
+                ) : (
+                  <a
+                    href="https://portfolio-demo.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#F2EFE6] text-[#243447] font-semibold border border-[#D8E2E6] hover:bg-[#D8E2E6] transition-colors text-xs"
+                  >
+                    <Globe className="w-3.5 h-3.5 text-[#66A3BF]" />
+                    <span>Portfolio Website</span>
+                  </a>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2 text-xs">
+              <span className="font-semibold text-[#243447]">Technical Skills & Proficiency</span>
+              <div className="flex flex-wrap gap-1.5">
+                {selectedStudentForModal.skills?.length > 0 ? (
+                  selectedStudentForModal.skills.map((s: any, idx: number) => (
+                    <span key={idx} className="px-2.5 py-1 rounded-full bg-[#E9F3FD] text-[#4874A0] font-medium border border-[#66A3BF]/30">
+                      {s.skillName} ({s.proficiency})
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-[#667085]">React, Node.js, TypeScript, Data Analysis, SQL</span>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-3 border-t border-[#D8E2E6]">
+              <button
+                onClick={() => setShowStudentProfileModal(false)}
+                className="btn-secondary text-xs"
+              >
+                Close Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
+

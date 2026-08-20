@@ -3,11 +3,28 @@ import { api } from '../services/api';
 import { StatusBadge } from '../components/StatusBadge';
 import { UserCheck, CheckCircle2, AlertTriangle, FileText, Send, MessageSquare } from 'lucide-react';
 
-export const MentorDashboard: React.FC = () => {
+interface MentorDashboardProps {
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
+}
+
+export const MentorDashboard: React.FC<MentorDashboardProps> = ({
+  activeTab: externalActiveTab,
+  onTabChange
+}) => {
   const [assignments, setAssignments] = useState<any[]>([]);
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'students' | 'reports' | 'evaluations'>('students');
+  const [internalActiveTab, setInternalActiveTab] = useState<'students' | 'reports' | 'evaluations'>('students');
+
+  const activeTab = (externalActiveTab as any) || internalActiveTab;
+
+  const setActiveTab = (tab: any) => {
+    setInternalActiveTab(tab);
+    if (onTabChange) onTabChange(tab);
+  };
+
+
 
   // Report Review State
   const [selectedReportId, setSelectedReportId] = useState('');

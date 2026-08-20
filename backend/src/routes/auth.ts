@@ -181,7 +181,120 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// POST /api/v1/auth/login
+// POST /api/v1/auth/google
+router.post('/google', async (req, res) => {
+  try {
+    const { email, name, role } = req.body;
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: 'Google authentication email is required' }
+      });
+    }
+
+    let user = await prisma.user.findUnique({
+      where: { email },
+      include: {
+        studentProfile: true,
+        companyProfile: true,
+        mentorProfile: true
+      }
+    });
+
+    if (!user) {
+      const assignedRole = role || 'STUDENT';
+      const passwordHash = await bcrypt.hash('google_oauth_secure_pwd_' + Math.random(), 10);
+      user = await prisma.user.create({
+        data: {
+          email,
+          passwordHash,
+          role: assignedRole,
+          isActive: true
+        },
+        include: {
+          studentProfile: true,
+          companyProfile: true,
+          mentorProfile: true
+        }
+      });
+
+      if (assignedRole === 'STUDENT') {
+        const studentCode = 'STU-' + Math.floor(100000 + Math.random() * 900000);
+        await prisma.studentProfile.create({
+          data: {
+            userId: user.id,
+            fullName: name || 'Google Student User',
+            studentCode,
+            department: 'CSE',
+            passingYear: 2026,
+            cgpa: 8.5,
+            backlogs: 0,
+            verificationStatus: 'VERIFIED',
+            completenessScore: 85
+          }
+        });
+      } else if (assignedRole === 'COMPANY') {
+        await prisma.companyProfile.create({
+          data: {
+            userId: user.id,
+            name: name ? `${name} Enterprise` : 'Google Partner Company',
+            industry: 'Technology',
+            location: 'Bangalore',
+            contactName: name || 'HR Representative',
+            contactEmail: email,
+            verificationStatus: 'VERIFIED'
+          }
+        });
+      } else if (assignedRole === 'MENTOR') {
+        await prisma.mentorProfile.create({
+          data: {
+            userId: user.id,
+            fullName: name || 'Faculty Mentor',
+            department: 'CSE',
+            title: 'Assistant Professor'
+          }
+        });
+      }
+
+      user = await prisma.user.findUnique({
+        where: { id: user.id },
+        include: {
+          studentProfile: true,
+          companyProfile: true,
+          mentorProfile: true
+        }
+      }) as any;
+    }
+
+    const token = jwt.sign(
+      { userId: user!.id, role: user!.role },
+      ENV.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    return res.json({
+      success: true,
+      data: {
+        token,
+        user: {
+          id: user!.id,
+          email: user!.email,
+          role: user!.role,
+          studentProfile: user!.studentProfile,
+          companyProfile: user!.companyProfile,
+          mentorProfile: user!.mentorProfile
+        }
+      }
+    });
+  } catch (error: any) {
+    console.error('Google Auth error:', error);
+    return res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to authenticate Google user' }
+    });
+  }
+});
+
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;

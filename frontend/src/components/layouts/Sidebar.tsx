@@ -20,9 +20,10 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ role, activeItem, onSelect, isOpenMobile }) => {
   const getNavItems = (): NavItem[] => {
+    let items: NavItem[] = [];
     switch (role) {
       case 'STUDENT':
-        return [
+        items = [
           { id: 'marketplace', label: 'Internship Discovery', icon: <Search className="w-4 h-4" /> },
           { id: 'applications', label: 'My Applications', icon: <FileText className="w-4 h-4" /> },
           { id: 'progress', label: 'Weekly Progress Logs', icon: <CheckCircle2 className="w-4 h-4" /> },
@@ -30,31 +31,38 @@ export const Sidebar: React.FC<SidebarProps> = ({ role, activeItem, onSelect, is
           { id: 'skillgap', label: 'AI Skill-Gap Analyzer', icon: <Sparkles className="w-4 h-4" /> },
           { id: 'resume', label: 'AI Resume Analyzer', icon: <Bot className="w-4 h-4" /> },
         ];
+        break;
       case 'COMPANY':
-        return [
+        items = [
           { id: 'vacancies', label: 'Vacancy Listings', icon: <Building2 className="w-4 h-4" /> },
           { id: 'applicants', label: 'AI Candidate Ranker', icon: <Sparkles className="w-4 h-4" /> },
           { id: 'evaluations', label: 'Intern Performance Rubric', icon: <Award className="w-4 h-4" /> },
           { id: 'ppo', label: 'PPO Offer Management', icon: <FileText className="w-4 h-4" /> },
         ];
+        break;
       case 'TNP':
       case 'ADMIN':
-        return [
+        items = [
           { id: 'verifications', label: 'Verification Queues', icon: <ShieldCheck className="w-4 h-4" /> },
           { id: 'mentors', label: 'Faculty Mentor Assignments', icon: <UserCheck className="w-4 h-4" /> },
           { id: 'analytics', label: 'Institutional Analytics', icon: <BarChart3 className="w-4 h-4" /> },
           { id: 'ppo', label: 'PPO Conversion Registry', icon: <Award className="w-4 h-4" /> },
         ];
+        break;
       case 'MENTOR':
-        return [
+        items = [
           { id: 'students', label: 'Assigned Mentees', icon: <UserCheck className="w-4 h-4" /> },
           { id: 'reports', label: 'Weekly Log Review Queue', icon: <FileText className="w-4 h-4" /> },
           { id: 'evaluations', label: 'Final Mentor Rubrics', icon: <Award className="w-4 h-4" /> },
         ];
+        break;
       default:
-        return [];
+        items = [];
     }
+    return items;
   };
+
+
 
   const navItems = getNavItems();
 

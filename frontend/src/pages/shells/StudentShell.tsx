@@ -12,7 +12,8 @@ export const StudentShell: React.FC = () => {
       pageTitle="Student Placement Workspace"
       pageSubtitle="Discover opportunities, evaluate eligibility, track applications, and submit progress reports."
     >
-      <StudentDashboard />
+      <StudentDashboard activeTab={activeItem} onTabChange={setActiveItem} />
     </DashboardLayout>
   );
 };
+

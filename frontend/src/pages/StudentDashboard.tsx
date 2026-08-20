@@ -676,11 +676,11 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
       )}
 
       {/* TOP-LEVEL TABS */}
-      <div className="flex flex-wrap gap-2 border-b border-slate-800 pb-2 text-xs">
+      <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-2 text-xs">
         <button
           onClick={() => setActiveTab('profile')}
           className={`px-4 py-2 rounded-xl font-semibold transition-all ${
-            activeTab === 'profile' ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:text-white bg-slate-900'
+            activeTab === 'profile' ? 'bg-[#4874A0] text-white shadow-sm' : 'text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200'
           }`}
         >
           👤 My Profile & Documents
@@ -688,7 +688,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
         <button
           onClick={() => setActiveTab('marketplace')}
           className={`px-4 py-2 rounded-xl font-semibold transition-all ${
-            activeTab === 'marketplace' ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:text-white bg-slate-900'
+            activeTab === 'marketplace' ? 'bg-[#4874A0] text-white shadow-sm' : 'text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200'
           }`}
         >
           🔍 Internship Discovery ({vacancies.length})
@@ -696,7 +696,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
         <button
           onClick={() => setActiveTab('applications')}
           className={`px-4 py-2 rounded-xl font-semibold transition-all ${
-            activeTab === 'applications' ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:text-white bg-slate-900'
+            activeTab === 'applications' ? 'bg-[#4874A0] text-white shadow-sm' : 'text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200'
           }`}
         >
           📄 My Applications ({profile?.applications?.length || 0})
@@ -704,7 +704,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
         <button
           onClick={() => setActiveTab('progress')}
           className={`px-4 py-2 rounded-xl font-semibold transition-all ${
-            activeTab === 'progress' ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:text-white bg-slate-900'
+            activeTab === 'progress' ? 'bg-[#4874A0] text-white shadow-sm' : 'text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200'
           }`}
         >
           📊 Weekly Progress Reports
@@ -712,7 +712,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
         <button
           onClick={() => setActiveTab('skillgap')}
           className={`px-4 py-2 rounded-xl font-semibold transition-all ${
-            activeTab === 'skillgap' ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:text-white bg-slate-900'
+            activeTab === 'skillgap' ? 'bg-[#4874A0] text-white shadow-sm' : 'text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200'
           }`}
         >
           ✨ AI Skill-Gap
@@ -720,7 +720,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
         <button
           onClick={() => setActiveTab('resume')}
           className={`px-4 py-2 rounded-xl font-semibold transition-all ${
-            activeTab === 'resume' ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:text-white bg-slate-900'
+            activeTab === 'resume' ? 'bg-[#4874A0] text-white shadow-sm' : 'text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200'
           }`}
         >
           ✨ AI Resume Analyzer
@@ -733,11 +733,11 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
       {activeTab === 'profile' && (
         <div className="space-y-6">
           {/* Sub-Navigation */}
-          <div className="flex flex-wrap gap-1.5 p-1 bg-slate-900/90 rounded-2xl border border-slate-800 text-xs">
+          <div className="flex flex-wrap gap-1.5 p-1 bg-slate-100 rounded-2xl border border-slate-200 text-xs">
             <button
               onClick={() => setProfileTab('personal')}
               className={`px-3.5 py-2 rounded-xl font-semibold transition-all ${
-                profileTab === 'personal' ? 'bg-cyan-500 text-white' : 'text-slate-400 hover:text-white'
+                profileTab === 'personal' ? 'bg-[#4874A0] text-white' : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200'
               }`}
             >
               Personal Info
@@ -745,7 +745,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             <button
               onClick={() => setProfileTab('academic')}
               className={`px-3.5 py-2 rounded-xl font-semibold transition-all ${
-                profileTab === 'academic' ? 'bg-cyan-500 text-white' : 'text-slate-400 hover:text-white'
+                profileTab === 'academic' ? 'bg-[#4874A0] text-white' : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200'
               }`}
             >
               Academics
@@ -753,7 +753,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             <button
               onClick={() => setProfileTab('skills')}
               className={`px-3.5 py-2 rounded-xl font-semibold transition-all ${
-                profileTab === 'skills' ? 'bg-cyan-500 text-white' : 'text-slate-400 hover:text-white'
+                profileTab === 'skills' ? 'bg-[#4874A0] text-white' : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200'
               }`}
             >
               Skills ({skillsList.length})
@@ -761,7 +761,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             <button
               onClick={() => setProfileTab('projects')}
               className={`px-3.5 py-2 rounded-xl font-semibold transition-all ${
-                profileTab === 'projects' ? 'bg-cyan-500 text-white' : 'text-slate-400 hover:text-white'
+                profileTab === 'projects' ? 'bg-[#4874A0] text-white' : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200'
               }`}
             >
               Projects ({profile?.projects?.length || 0})
@@ -769,7 +769,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             <button
               onClick={() => setProfileTab('experience')}
               className={`px-3.5 py-2 rounded-xl font-semibold transition-all ${
-                profileTab === 'experience' ? 'bg-cyan-500 text-white' : 'text-slate-400 hover:text-white'
+                profileTab === 'experience' ? 'bg-[#4874A0] text-white' : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200'
               }`}
             >
               Experience ({profile?.experiences?.length || 0})
@@ -777,7 +777,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             <button
               onClick={() => setProfileTab('certifications')}
               className={`px-3.5 py-2 rounded-xl font-semibold transition-all ${
-                profileTab === 'certifications' ? 'bg-cyan-500 text-white' : 'text-slate-400 hover:text-white'
+                profileTab === 'certifications' ? 'bg-[#4874A0] text-white' : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200'
               }`}
             >
               Certifications ({profile?.certifications?.length || 0})
@@ -785,7 +785,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             <button
               onClick={() => setProfileTab('preferences')}
               className={`px-3.5 py-2 rounded-xl font-semibold transition-all ${
-                profileTab === 'preferences' ? 'bg-cyan-500 text-white' : 'text-slate-400 hover:text-white'
+                profileTab === 'preferences' ? 'bg-[#4874A0] text-white' : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200'
               }`}
             >
               Preferences
@@ -793,7 +793,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             <button
               onClick={() => setProfileTab('documents')}
               className={`px-3.5 py-2 rounded-xl font-semibold transition-all ${
-                profileTab === 'documents' ? 'bg-cyan-500 text-white' : 'text-slate-400 hover:text-white'
+                profileTab === 'documents' ? 'bg-[#4874A0] text-white' : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200'
               }`}
             >
               📁 Documents & Resume ({profile?.documents?.length || 0})

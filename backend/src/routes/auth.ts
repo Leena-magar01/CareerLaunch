@@ -1,10 +1,13 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { OAuth2Client } from 'google-auth-library';
 import { prisma } from '../config/db';
 import { ENV } from '../config/env';
 import { authenticateJwt, AuthRequest } from '../middleware/auth';
 import { calculateProfileCompleteness } from '../services/studentProfileService';
+
+const googleClient = new OAuth2Client(ENV.GOOGLE_CLIENT_ID);
 
 const router = Router();
 
@@ -184,90 +187,117 @@ router.post('/register', async (req, res) => {
 // POST /api/v1/auth/google
 router.post('/google', async (req, res) => {
   try {
-    const { email, name, role } = req.body;
+    const { email, name, googleId, role } = req.body;
+
     if (!email) {
       return res.status(400).json({
         success: false,
-        error: { code: 'VALIDATION_ERROR', message: 'Google authentication email is required' }
+        error: { code: 'VALIDATION_ERROR', message: 'Email is required for Google sign-in' }
       });
     }
 
+    const googleEmail = email.toLowerCase();
+    const googleName = name || googleEmail.split('@')[0];
+
     let user = await prisma.user.findUnique({
-      where: { email },
+      where: { email: googleEmail },
       include: {
-        studentProfile: true,
+        studentProfile: { include: { skills: true, projects: true, experiences: true, certifications: true } },
         companyProfile: true,
-        mentorProfile: true
+        mentorProfile: true,
       }
     });
 
     if (!user) {
-      const assignedRole = role || 'STUDENT';
-      const passwordHash = await bcrypt.hash('google_oauth_secure_pwd_' + Math.random(), 10);
+      // New user — role must be supplied by the frontend (selected on portal card)
+      const assignedRole = (role || 'STUDENT').toUpperCase();
+      const allowedRoles = ['STUDENT', 'COMPANY', 'TNP', 'MENTOR'];
+      if (!allowedRoles.includes(assignedRole)) {
+        return res.status(400).json({
+          success: false,
+          error: { code: 'VALIDATION_ERROR', message: `Invalid role. Must be one of: ${allowedRoles.join(', ')}` }
+        });
+      }
+
+      // Generate a random unusable password hash — Google users never use password login
+      const passwordHash = await bcrypt.hash(`google_${googleId || Date.now()}_${Math.random()}`, 10);
+
       user = await prisma.user.create({
         data: {
-          email,
+          email: googleEmail,
           passwordHash,
           role: assignedRole,
-          isActive: true
+          status: 'ACTIVE',
         },
         include: {
           studentProfile: true,
           companyProfile: true,
-          mentorProfile: true
+          mentorProfile: true,
         }
-      });
+      }) as any;
 
+      // Create matching role profile
       if (assignedRole === 'STUDENT') {
         const studentCode = 'STU-' + Math.floor(100000 + Math.random() * 900000);
         await prisma.studentProfile.create({
           data: {
-            userId: user.id,
-            fullName: name || 'Google Student User',
+            userId: user!.id,
+            fullName: googleName,
             studentCode,
             department: 'CSE',
             passingYear: 2026,
             cgpa: 8.5,
             backlogs: 0,
-            verificationStatus: 'VERIFIED',
-            completenessScore: 85
           }
         });
       } else if (assignedRole === 'COMPANY') {
         await prisma.companyProfile.create({
           data: {
-            userId: user.id,
-            name: name ? `${name} Enterprise` : 'Google Partner Company',
+            userId: user!.id,
+            name: `${googleName} Enterprise`,
             industry: 'Technology',
-            location: 'Bangalore',
-            contactName: name || 'HR Representative',
-            contactEmail: email,
-            verificationStatus: 'VERIFIED'
+            location: 'India',
+            contactName: googleName,
+            contactEmail: googleEmail,
           }
         });
       } else if (assignedRole === 'MENTOR') {
         await prisma.mentorProfile.create({
           data: {
-            userId: user.id,
-            fullName: name || 'Faculty Mentor',
+            userId: user!.id,
+            fullName: googleName,
             department: 'CSE',
-            title: 'Assistant Professor'
+            designation: 'Assistant Professor',
           }
         });
       }
 
+      // Re-fetch with profiles included
       user = await prisma.user.findUnique({
-        where: { id: user.id },
+        where: { id: user!.id },
         include: {
-          studentProfile: true,
+          studentProfile: { include: { skills: true, projects: true, experiences: true, certifications: true } },
           companyProfile: true,
-          mentorProfile: true
+          mentorProfile: true,
         }
       }) as any;
     }
 
+    // Build profile data with completeness score for students
+    let profileData: any = null;
+    if (user!.role === 'STUDENT' && user!.studentProfile) {
+      const docCount = await prisma.document.count({ where: { ownerUserId: user!.id } });
+      const completeness = calculateProfileCompleteness(user!.studentProfile, docCount);
+      profileData = { ...user!.studentProfile, completeness };
+    } else if (user!.role === 'COMPANY') {
+      profileData = user!.companyProfile;
+    } else if (user!.role === 'MENTOR') {
+      profileData = user!.mentorProfile;
+    }
+
+    // Sign JWT with same shape as /login for consistency
     const token = jwt.sign(
-      { userId: user!.id, role: user!.role },
+      { id: user!.id, email: user!.email, role: user!.role },
       ENV.JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -280,9 +310,10 @@ router.post('/google', async (req, res) => {
           id: user!.id,
           email: user!.email,
           role: user!.role,
+          profile: profileData,
           studentProfile: user!.studentProfile,
           companyProfile: user!.companyProfile,
-          mentorProfile: user!.mentorProfile
+          mentorProfile: user!.mentorProfile,
         }
       }
     });
@@ -290,7 +321,7 @@ router.post('/google', async (req, res) => {
     console.error('Google Auth error:', error);
     return res.status(500).json({
       success: false,
-      error: { code: 'SERVER_ERROR', message: 'Failed to authenticate Google user' }
+      error: { code: 'SERVER_ERROR', message: 'Failed to authenticate with Google' }
     });
   }
 });

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
-import { GraduationCap, Building2, UserCheck, Lock, Mail, User, ArrowLeft } from 'lucide-react';
+import { GraduationCap, Building2, UserCheck, ShieldCheck, Lock, Mail, User, ArrowLeft } from 'lucide-react';
 
 interface RegisterPageProps {
   onNavigateLogin: () => void;
@@ -10,7 +10,7 @@ interface RegisterPageProps {
 
 export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigateLogin, onNavigateHome }) => {
   const { login } = useAuth();
-  const [role, setRole] = useState<'STUDENT' | 'COMPANY' | 'MENTOR'>('STUDENT');
+  const [role, setRole] = useState<'STUDENT' | 'COMPANY' | 'MENTOR' | 'TNP'>('STUDENT');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -65,7 +65,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigateLogin, onN
         </div>
 
         {/* Role Selector Tabs */}
-        <div className="grid grid-cols-3 gap-2 bg-[#E9F3FD]/40 p-1.5 rounded-lg border border-[#D8E2E6] text-xs">
+        <div className="grid grid-cols-2 gap-2 bg-[#E9F3FD]/40 p-1.5 rounded-lg border border-[#D8E2E6] text-xs">
           <button
             type="button"
             onClick={() => setRole('STUDENT')}
@@ -101,6 +101,18 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigateLogin, onN
           >
             <UserCheck className="w-3.5 h-3.5" />
             <span>Mentor</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setRole('TNP')}
+            className={`py-2 px-3 rounded-md font-semibold flex items-center justify-center space-x-1.5 transition-colors ${
+              role === 'TNP'
+                ? 'bg-white text-[#4874A0] shadow-sm border border-[#D8E2E6]'
+                : 'text-[#667085] hover:text-[#243447]'
+            }`}
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>T&amp;P Admin</span>
           </button>
         </div>
 

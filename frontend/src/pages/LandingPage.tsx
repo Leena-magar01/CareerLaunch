@@ -1,7 +1,93 @@
 import React, { useState } from 'react';
-import { GraduationCap, Building2, ShieldCheck, UserCheck, Search, ArrowRight, CheckCircle2, Award, TrendingUp, Sparkles, FileCheck, Layers } from 'lucide-react';
+import { GraduationCap, Building2, ShieldCheck, UserCheck, Search, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { useGoogleLogin } from '@react-oauth/google';
 import { api } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import { StatusBadge } from '../components/StatusBadge';
+
+// Google SVG logo
+const GoogleIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+  </svg>
+);
+
+// Custom Google button — always visible, uses implicit OAuth flow (access_token)
+interface GoogleSignInButtonProps {
+  role: string;
+  onLoginSuccess: (token: string, user: any) => void;
+  onLoginError: (msg: string) => void;
+}
+const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({ role, onLoginSuccess, onLoginError }) => {
+  const [loading, setLoading] = useState(false);
+
+  const googleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      setLoading(true);
+      try {
+        // Fetch Google user info using the access token
+        const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+        });
+        const userInfo = await userInfoRes.json();
+
+        // Send user info + role to our backend
+        const res = await api.post('/auth/google', {
+          email: userInfo.email,
+          name: userInfo.name,
+          googleId: userInfo.sub,
+          picture: userInfo.picture,
+          role,
+        });
+
+        if (res.data.success) {
+          onLoginSuccess(res.data.data.token, res.data.data.user);
+        } else {
+          onLoginError('Google sign-in failed. Please try again.');
+        }
+      } catch (err: any) {
+        const msg = err?.response?.data?.error?.message || 'Google sign-in failed. Please try again.';
+        onLoginError(msg);
+      } finally {
+        setLoading(false);
+      }
+    },
+    onError: () => onLoginError('Google sign-in was cancelled or failed.'),
+  });
+
+  return (
+    <button
+      type="button"
+      onClick={() => { setLoading(true); googleLogin(); }}
+      disabled={loading}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '8px',
+        width: '100%',
+        padding: '8px 12px',
+        border: '1px solid #D8E2E6',
+        borderRadius: '6px',
+        background: '#ffffff',
+        color: '#243447',
+        fontSize: '12px',
+        fontWeight: 500,
+        cursor: loading ? 'not-allowed' : 'pointer',
+        opacity: loading ? 0.7 : 1,
+        transition: 'box-shadow 0.15s, border-color 0.15s',
+      }}
+      onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 2px 8px rgba(102,163,191,0.25)')}
+      onMouseLeave={e => (e.currentTarget.style.boxShadow = 'none')}
+    >
+      <GoogleIcon />
+      <span>{loading ? 'Signing in...' : 'Continue with Google'}</span>
+    </button>
+  );
+};
 
 interface LandingPageProps {
   onNavigateLogin: (role?: string) => void;
@@ -9,10 +95,21 @@ interface LandingPageProps {
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateLogin, onNavigateVerify }) => {
+  const { login } = useAuth();
   const [searchCode, setSearchCode] = useState('');
   const [verifyResult, setVerifyResult] = useState<any>(null);
   const [searching, setSearching] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [googleError, setGoogleError] = useState('');
+
+  const handleGoogleLoginSuccess = (token: string, user: any) => {
+    setGoogleError('');
+    login(token, user);
+  };
+
+  const handleGoogleLoginError = (msg: string) => {
+    setGoogleError(msg);
+  };
 
   const handleVerifySearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,6 +235,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateLogin, onNav
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Student Portal Card */}
             <div
               onClick={() => onNavigateLogin('STUDENT')}
               className="card-base hover:border-[#66A3BF] cursor-pointer group space-y-4"
@@ -155,8 +253,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateLogin, onNav
                 <span>Sign In as Student</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </div>
+              <div className="pt-1" onClick={(e) => e.stopPropagation()}>
+                <div className="text-[10px] text-[#667085] text-center mb-1.5">or</div>
+                <GoogleSignInButton
+                  role="STUDENT"
+                  onLoginSuccess={handleGoogleLoginSuccess}
+                  onLoginError={handleGoogleLoginError}
+                />
+              </div>
             </div>
 
+            {/* Company / Recruiter Card */}
             <div
               onClick={() => onNavigateLogin('COMPANY')}
               className="card-base hover:border-[#66A3BF] cursor-pointer group space-y-4"
@@ -174,8 +281,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateLogin, onNav
                 <span>Sign In as Recruiter</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </div>
+              <div className="pt-1" onClick={(e) => e.stopPropagation()}>
+                <div className="text-[10px] text-[#667085] text-center mb-1.5">or</div>
+                <GoogleSignInButton
+                  role="COMPANY"
+                  onLoginSuccess={handleGoogleLoginSuccess}
+                  onLoginError={handleGoogleLoginError}
+                />
+              </div>
             </div>
 
+            {/* T&P Placement Cell Card */}
             <div
               onClick={() => onNavigateLogin('TNP')}
               className="card-base hover:border-[#66A3BF] cursor-pointer group space-y-4"
@@ -193,8 +309,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateLogin, onNav
                 <span>Sign In as T&P Admin</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </div>
+              <div className="pt-1" onClick={(e) => e.stopPropagation()}>
+                <div className="text-[10px] text-[#667085] text-center mb-1.5">or</div>
+                <GoogleSignInButton
+                  role="TNP"
+                  onLoginSuccess={handleGoogleLoginSuccess}
+                  onLoginError={handleGoogleLoginError}
+                />
+              </div>
             </div>
 
+            {/* Faculty Mentor Card */}
             <div
               onClick={() => onNavigateLogin('MENTOR')}
               className="card-base hover:border-[#66A3BF] cursor-pointer group space-y-4"
@@ -212,8 +337,23 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateLogin, onNav
                 <span>Sign In as Mentor</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </div>
+              <div className="pt-1" onClick={(e) => e.stopPropagation()}>
+                <div className="text-[10px] text-[#667085] text-center mb-1.5">or</div>
+                <GoogleSignInButton
+                  role="MENTOR"
+                  onLoginSuccess={handleGoogleLoginSuccess}
+                  onLoginError={handleGoogleLoginError}
+                />
+              </div>
             </div>
           </div>
+
+          {/* Google error banner */}
+          {googleError && (
+            <div className="mt-4 p-3 bg-[#C95A5A]/10 border border-[#C95A5A]/20 rounded-md text-[#C95A5A] text-xs text-center max-w-xl mx-auto">
+              {googleError}
+            </div>
+          )}
         </section>
 
         {/* How It Works Section */}

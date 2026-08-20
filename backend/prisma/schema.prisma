@@ -1,12 +1,12 @@
-// Prisma Schema for AI-Powered Internship Management System (SQLite Compatible)
+// Prisma Schema for CareerLaunch — PostgreSQL (Production)
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {

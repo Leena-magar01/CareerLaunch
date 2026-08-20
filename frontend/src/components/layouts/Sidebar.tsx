@@ -1,8 +1,9 @@
 import React from 'react';
 import {
   GraduationCap, Building2, ShieldCheck, UserCheck, Search,
-  FileText, Award, BarChart3, Settings, HelpCircle, Bot, Sparkles, CheckCircle2
+  FileText, Award, BarChart3, Settings, HelpCircle, Bot, Sparkles, CheckCircle2, LogOut
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 export interface NavItem {
   id: string;
@@ -16,9 +17,20 @@ interface SidebarProps {
   activeItem: string;
   onSelect: (id: string) => void;
   isOpenMobile?: boolean;
+  user?: any;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ role, activeItem, onSelect, isOpenMobile }) => {
+const roleLabel: Record<string, string> = {
+  STUDENT: 'Student',
+  COMPANY: 'Recruiter',
+  TNP: 'T&P Admin',
+  MENTOR: 'Mentor',
+  ADMIN: 'Administrator',
+};
+
+export const Sidebar: React.FC<SidebarProps> = ({ role, activeItem, onSelect, isOpenMobile, user }) => {
+  const { logout } = useAuth();
+
   const getNavItems = (): NavItem[] => {
     let items: NavItem[] = [];
     switch (role) {
@@ -62,9 +74,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ role, activeItem, onSelect, is
     return items;
   };
 
-
-
   const navItems = getNavItems();
+
+  // Generate initials from email or name
+  const displayEmail = user?.email || '';
+  const initials = displayEmail
+    ? displayEmail.slice(0, 2).toUpperCase()
+    : role?.slice(0, 2).toUpperCase();
 
   return (
     <aside className={`w-64 bg-white border-r border-slate-200 flex flex-col justify-between py-6 px-4 shrink-0 text-slate-900 ${
@@ -105,10 +121,35 @@ export const Sidebar: React.FC<SidebarProps> = ({ role, activeItem, onSelect, is
         </nav>
       </div>
 
-      <div className="px-3 pt-4 border-t border-slate-200 text-[11px] text-slate-500">
-        CareerLaunch Platform v1.0
+      {/* ── Bottom: Profile Card + Logout ── */}
+      <div className="space-y-3">
+        {/* Profile card */}
+        <div className="flex items-center gap-3 px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl">
+          {/* Avatar circle */}
+          <div className="w-9 h-9 rounded-full bg-[#4874A0] text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-sm">
+            {initials}
+          </div>
+          <div className="overflow-hidden">
+            <p className="text-xs font-bold text-slate-900 leading-tight truncate">
+              {roleLabel[role] || role}
+            </p>
+            <p className="text-[10px] text-slate-500 truncate">{displayEmail}</p>
+          </div>
+        </div>
+
+        {/* Logout button */}
+        <button
+          onClick={logout}
+          className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-100 transition-all"
+        >
+          <LogOut className="w-4 h-4" />
+          Sign Out
+        </button>
+
+        <div className="px-1 text-[10px] text-slate-400">
+          CareerLaunch Platform v1.0
+        </div>
       </div>
     </aside>
   );
 };
-

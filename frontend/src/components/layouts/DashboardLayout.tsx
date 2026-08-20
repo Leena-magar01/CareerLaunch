@@ -52,6 +52,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             activeItem={activeItem}
             onSelect={handleSelectNav}
             isOpenMobile={isMobileSidebarOpen}
+            user={user}
           />
         )}
 

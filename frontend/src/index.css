@@ -59,10 +59,35 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   .input-base {
-    @apply bg-white border border-slate-300 text-slate-900 text-sm rounded-[8px] px-3.5 py-2 w-full focus:outline-none focus:border-[#66A3BF] focus:ring-2 focus:ring-[#66A3BF]/20 transition-all placeholder:text-slate-400;
+    @apply bg-white border border-slate-300 text-slate-900 text-sm rounded-[8px] px-3.5 py-2 w-full focus:outline-none focus:border-[#66A3BF] focus:ring-2 focus:ring-[#66A3BF]/20 transition-all placeholder:text-sky-300;
   }
 
   .badge-status {
     @apply px-2.5 py-1 rounded-full text-xs font-semibold inline-flex items-center gap-1.5 border;
   }
+}
+
+/* ── Global Input Override ── */
+/* Force ALL inputs/textareas/selects to white bg + dark text,
+   no matter which Tailwind bg-slate-* class is applied inline. */
+input,
+textarea,
+select {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #7dd3fc !important; /* sky-300 */
+  opacity: 1;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none !important;
+  border-color: #66A3BF !important;
+  box-shadow: 0 0 0 3px rgba(102, 163, 191, 0.2) !important;
 }

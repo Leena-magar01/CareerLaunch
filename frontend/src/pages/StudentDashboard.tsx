@@ -819,7 +819,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                 <div className="space-y-1">
-                  <label className="text-slate-300 font-semibold">Full Name</label>
+                  <label className="text-slate-800 font-semibold">Full Name</label>
                   <div className="relative">
                     <User className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
                     <input
@@ -833,7 +833,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-slate-300 font-semibold">Contact Phone Number</label>
+                  <label className="text-slate-800 font-semibold">Contact Phone Number</label>
                   <div className="relative">
                     <Phone className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
                     <input
@@ -847,7 +847,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                 </div>
 
                 <div className="space-y-1 md:col-span-2">
-                  <label className="text-slate-300 font-semibold">Professional Summary / Bio</label>
+                  <label className="text-slate-800 font-semibold">Professional Summary / Bio</label>
                   <textarea
                     rows={3}
                     value={bio}
@@ -858,7 +858,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-slate-300 font-semibold">Current Location / Address</label>
+                  <label className="text-slate-800 font-semibold">Current Location / Address</label>
                   <div className="relative">
                     <MapPin className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
                     <input
@@ -872,7 +872,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-slate-300 font-semibold">LinkedIn Profile URL</label>
+                  <label className="text-slate-800 font-semibold">LinkedIn Profile URL</label>
                   <div className="relative">
                     <Linkedin className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
                     <input
@@ -886,7 +886,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-slate-300 font-semibold">GitHub Profile URL</label>
+                  <label className="text-slate-800 font-semibold">GitHub Profile URL</label>
                   <div className="relative">
                     <Github className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
                     <input
@@ -900,7 +900,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-slate-300 font-semibold">Portfolio / Personal Website</label>
+                  <label className="text-slate-800 font-semibold">Portfolio / Personal Website</label>
                   <div className="relative">
                     <Globe className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
                     <input
@@ -935,7 +935,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                 <div className="space-y-1">
-                  <label className="text-slate-300 font-semibold">Department / Engineering Branch</label>
+                  <label className="text-slate-800 font-semibold">Department / Engineering Branch</label>
                   <select
                     value={department}
                     onChange={(e) => setDepartment(e.target.value)}
@@ -952,7 +952,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-slate-300 font-semibold">Graduation / Passing Year</label>
+                  <label className="text-slate-800 font-semibold">Graduation / Passing Year</label>
                   <input
                     type="number"
                     value={passingYear}
@@ -962,7 +962,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-slate-300 font-semibold">Cumulative CGPA (0.00 - 10.00)</label>
+                  <label className="text-slate-800 font-semibold">Cumulative CGPA (0.00 - 10.00)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -975,7 +975,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-slate-300 font-semibold">Active Backlogs Count</label>
+                  <label className="text-slate-800 font-semibold">Active Backlogs Count</label>
                   <input
                     type="number"
                     min="0"
@@ -1079,7 +1079,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                 </h3>
                 <form onSubmit={handleAddProject} className="space-y-3 text-xs">
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-semibold">Project Title</label>
+                    <label className="text-slate-800 font-semibold">Project Title</label>
                     <input
                       type="text"
                       required
@@ -1091,7 +1091,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-semibold">Technologies Used</label>
+                    <label className="text-slate-800 font-semibold">Technologies Used</label>
                     <input
                       type="text"
                       placeholder="e.g. React, Node.js, Redis, Docker"
@@ -1102,7 +1102,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-semibold">Project / GitHub URL</label>
+                    <label className="text-slate-800 font-semibold">Project / GitHub URL</label>
                     <input
                       type="url"
                       placeholder="https://github.com/username/project"
@@ -1113,7 +1113,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-semibold">Description</label>
+                    <label className="text-slate-800 font-semibold">Description</label>
                     <textarea
                       rows={3}
                       placeholder="Explain the problem solved, architecture, and impact..."
@@ -1182,7 +1182,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                 </h3>
                 <form onSubmit={handleAddExperience} className="space-y-3 text-xs">
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-semibold">Company / Organization</label>
+                    <label className="text-slate-800 font-semibold">Company / Organization</label>
                     <input
                       type="text"
                       required
@@ -1194,7 +1194,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-semibold">Role Title</label>
+                    <label className="text-slate-800 font-semibold">Role Title</label>
                     <input
                       type="text"
                       required
@@ -1207,7 +1207,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
 
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-1">
-                      <label className="text-slate-300 font-semibold">Start Date</label>
+                      <label className="text-slate-800 font-semibold">Start Date</label>
                       <input
                         type="date"
                         value={expStart}
@@ -1216,7 +1216,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-slate-300 font-semibold">End Date</label>
+                      <label className="text-slate-800 font-semibold">End Date</label>
                       <input
                         type="date"
                         disabled={expCurrent}
@@ -1239,7 +1239,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-semibold">Location</label>
+                    <label className="text-slate-800 font-semibold">Location</label>
                     <input
                       type="text"
                       placeholder="e.g. Remote / Pune"
@@ -1250,7 +1250,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-semibold">Responsibilities & Learnings</label>
+                    <label className="text-slate-800 font-semibold">Responsibilities & Learnings</label>
                     <textarea
                       rows={3}
                       placeholder="Key achievements and technologies utilized..."
@@ -1310,7 +1310,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                 </h3>
                 <form onSubmit={handleAddCertification} className="space-y-3 text-xs">
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-semibold">Certification Name</label>
+                    <label className="text-slate-800 font-semibold">Certification Name</label>
                     <input
                       type="text"
                       required
@@ -1322,7 +1322,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-semibold">Issuer / Organization</label>
+                    <label className="text-slate-800 font-semibold">Issuer / Organization</label>
                     <input
                       type="text"
                       required
@@ -1334,7 +1334,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-semibold">Issue Date</label>
+                    <label className="text-slate-800 font-semibold">Issue Date</label>
                     <input
                       type="date"
                       value={certDate}
@@ -1396,7 +1396,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
               <div className="space-y-4 text-xs">
                 {/* Domain Selector */}
                 <div className="space-y-2">
-                  <label className="text-slate-300 font-semibold block">Preferred Internship Domains:</label>
+                  <label className="text-slate-800 font-semibold block">Preferred Internship Domains:</label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
                     {domainOptions.map((dom) => {
                       const isSelected = selectedDomains.includes(dom);
@@ -1422,7 +1422,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                 {/* Internship Mode */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-semibold">Preferred Working Mode</label>
+                    <label className="text-slate-800 font-semibold">Preferred Working Mode</label>
                     <select
                       value={preferredMode}
                       onChange={(e) => setPreferredMode(e.target.value)}
@@ -1436,7 +1436,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-semibold">Preferred Locations (Comma separated)</label>
+                    <label className="text-slate-800 font-semibold">Preferred Locations (Comma separated)</label>
                     <input
                       type="text"
                       placeholder="e.g. Pune, Bangalore, Mumbai, Remote"
@@ -1499,7 +1499,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
 
                 <form onSubmit={handleFileUpload} className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs items-end">
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-semibold">Document Category</label>
+                    <label className="text-slate-800 font-semibold">Document Category</label>
                     <select
                       value={uploadDocType}
                       onChange={(e) => setUploadDocType(e.target.value)}
@@ -1514,7 +1514,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-semibold">Select File (PDF, PNG, JPG &le; 10MB)</label>
+                    <label className="text-slate-800 font-semibold">Select File (PDF, PNG, JPG &le; 10MB)</label>
                     <input
                       type="file"
                       accept=".pdf,image/png,image/jpeg,image/webp"
@@ -2033,3 +2033,4 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
     </div>
   );
 };
+

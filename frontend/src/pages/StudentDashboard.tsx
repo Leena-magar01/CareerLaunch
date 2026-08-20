@@ -589,56 +589,57 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
         </div>
 
         {/* Completeness Criteria Chips */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 pt-2 border-t border-slate-800/80 text-[11px]">
-          <div className={`p-2 rounded-xl border flex items-center space-x-1.5 ${
-            completeness.breakdown?.personal?.completed ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-300' : 'bg-slate-900 border-slate-800 text-slate-400'
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 pt-2 border-t border-slate-200 text-[11px]">
+          <div className={`p-2 rounded-xl border flex items-center space-x-1.5 font-semibold ${
+            completeness.breakdown?.personal?.completed ? 'bg-emerald-100 border-emerald-300 text-slate-900' : 'bg-slate-100 border-slate-200 text-slate-700'
           }`}>
-            {completeness.breakdown?.personal?.completed ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <AlertCircle className="w-3.5 h-3.5 text-amber-400" />}
+            {completeness.breakdown?.personal?.completed ? <Check className="w-3.5 h-3.5 text-emerald-700 font-bold" /> : <AlertCircle className="w-3.5 h-3.5 text-amber-600" />}
             <span>Personal (20%)</span>
           </div>
 
-          <div className={`p-2 rounded-xl border flex items-center space-x-1.5 ${
-            completeness.breakdown?.academic?.completed ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-300' : 'bg-slate-900 border-slate-800 text-slate-400'
+          <div className={`p-2 rounded-xl border flex items-center space-x-1.5 font-semibold ${
+            completeness.breakdown?.academic?.completed ? 'bg-emerald-100 border-emerald-300 text-slate-900' : 'bg-slate-100 border-slate-200 text-slate-700'
           }`}>
-            {completeness.breakdown?.academic?.completed ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <AlertCircle className="w-3.5 h-3.5 text-amber-400" />}
+            {completeness.breakdown?.academic?.completed ? <Check className="w-3.5 h-3.5 text-emerald-700 font-bold" /> : <AlertCircle className="w-3.5 h-3.5 text-amber-600" />}
             <span>Academic (20%)</span>
           </div>
 
-          <div className={`p-2 rounded-xl border flex items-center space-x-1.5 ${
-            completeness.breakdown?.skills?.completed ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-300' : 'bg-slate-900 border-slate-800 text-slate-400'
+          <div className={`p-2 rounded-xl border flex items-center space-x-1.5 font-semibold ${
+            completeness.breakdown?.skills?.completed ? 'bg-emerald-100 border-emerald-300 text-slate-900' : 'bg-slate-100 border-slate-200 text-slate-700'
           }`}>
-            {completeness.breakdown?.skills?.completed ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <AlertCircle className="w-3.5 h-3.5 text-amber-400" />}
+            {completeness.breakdown?.skills?.completed ? <Check className="w-3.5 h-3.5 text-emerald-700 font-bold" /> : <AlertCircle className="w-3.5 h-3.5 text-amber-600" />}
             <span>Skills (15%)</span>
           </div>
 
-          <div className={`p-2 rounded-xl border flex items-center space-x-1.5 ${
-            completeness.breakdown?.projectsAndExperience?.completed ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-300' : 'bg-slate-900 border-slate-800 text-slate-400'
+          <div className={`p-2 rounded-xl border flex items-center space-x-1.5 font-semibold ${
+            completeness.breakdown?.projectsAndExperience?.completed ? 'bg-emerald-100 border-emerald-300 text-slate-900' : 'bg-slate-100 border-slate-200 text-slate-700'
           }`}>
-            {completeness.breakdown?.projectsAndExperience?.completed ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <AlertCircle className="w-3.5 h-3.5 text-amber-400" />}
+            {completeness.breakdown?.projectsAndExperience?.completed ? <Check className="w-3.5 h-3.5 text-emerald-700 font-bold" /> : <AlertCircle className="w-3.5 h-3.5 text-amber-600" />}
             <span>Projects & Exp (15%)</span>
           </div>
 
-          <div className={`p-2 rounded-xl border flex items-center space-x-1.5 ${
-            completeness.breakdown?.resume?.completed ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-300' : 'bg-slate-900 border-slate-800 text-slate-400'
+          <div className={`p-2 rounded-xl border flex items-center space-x-1.5 font-semibold ${
+            completeness.breakdown?.resume?.completed ? 'bg-emerald-100 border-emerald-300 text-slate-900' : 'bg-slate-100 border-slate-200 text-slate-700'
           }`}>
-            {completeness.breakdown?.resume?.completed ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <AlertCircle className="w-3.5 h-3.5 text-amber-400" />}
+            {completeness.breakdown?.resume?.completed ? <Check className="w-3.5 h-3.5 text-emerald-700 font-bold" /> : <AlertCircle className="w-3.5 h-3.5 text-amber-600" />}
             <span>Resume (15%)</span>
           </div>
 
-          <div className={`p-2 rounded-xl border flex items-center space-x-1.5 ${
-            completeness.breakdown?.documents?.completed ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-300' : 'bg-slate-900 border-slate-800 text-slate-400'
+          <div className={`p-2 rounded-xl border flex items-center space-x-1.5 font-semibold ${
+            completeness.breakdown?.documents?.completed ? 'bg-emerald-100 border-emerald-300 text-slate-900' : 'bg-slate-100 border-slate-200 text-slate-700'
           }`}>
-            {completeness.breakdown?.documents?.completed ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <AlertCircle className="w-3.5 h-3.5 text-amber-400" />}
+            {completeness.breakdown?.documents?.completed ? <Check className="w-3.5 h-3.5 text-emerald-700 font-bold" /> : <AlertCircle className="w-3.5 h-3.5 text-amber-600" />}
             <span>Documents (10%)</span>
           </div>
 
-          <div className={`p-2 rounded-xl border flex items-center space-x-1.5 ${
-            completeness.breakdown?.preferences?.completed ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-300' : 'bg-slate-900 border-slate-800 text-slate-400'
+          <div className={`p-2 rounded-xl border flex items-center space-x-1.5 font-semibold ${
+            completeness.breakdown?.preferences?.completed ? 'bg-emerald-100 border-emerald-300 text-slate-900' : 'bg-slate-100 border-slate-200 text-slate-700'
           }`}>
-            {completeness.breakdown?.preferences?.completed ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <AlertCircle className="w-3.5 h-3.5 text-amber-400" />}
+            {completeness.breakdown?.preferences?.completed ? <Check className="w-3.5 h-3.5 text-emerald-700 font-bold" /> : <AlertCircle className="w-3.5 h-3.5 text-amber-600" />}
             <span>Preferences (5%)</span>
           </div>
         </div>
+
 
         {/* Missing Checklist Dropdown Panel */}
         {showMissingAlert && (

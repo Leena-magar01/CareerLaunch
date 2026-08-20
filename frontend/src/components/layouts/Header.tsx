@@ -63,35 +63,35 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCopilot, onToggleMobileSid
 
   const getRoleBadge = (role?: string) => {
     switch (role) {
-      case 'STUDENT': return 'bg-[#E9F3FD] text-[#4874A0] border-[#66A3BF]/30';
-      case 'COMPANY': return 'bg-[#E9F3FD] text-[#4874A0] border-[#66A3BF]/30';
-      case 'TNP': return 'bg-[#C9963E]/10 text-[#C9963E] border-[#C9963E]/30';
-      case 'MENTOR': return 'bg-[#4F8A68]/10 text-[#4F8A68] border-[#4F8A68]/30';
-      default: return 'bg-[#F2EFE6] text-[#243447] border-[#D8E2E6]';
+      case 'STUDENT': return 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30';
+      case 'COMPANY': return 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30';
+      case 'TNP': return 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+      case 'MENTOR': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+      default: return 'bg-slate-800 text-slate-300 border-slate-700';
     }
   };
 
   return (
-    <header className="bg-white px-4 sm:px-6 py-3 flex items-center justify-between border-b border-[#D8E2E6] sticky top-0 z-30 shadow-xs">
+    <header className="glass-nav px-4 sm:px-6 py-3 flex items-center justify-between border-b border-slate-800 relative z-30">
       <div className="flex items-center space-x-3">
         {onToggleMobileSidebar && (
           <button
             onClick={onToggleMobileSidebar}
-            className="md:hidden p-2 rounded-lg text-[#667085] hover:text-[#243447] hover:bg-[#E9F3FD] transition-colors"
+            className="md:hidden p-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-all"
             aria-label="Toggle navigation menu"
           >
             <Menu className="w-5 h-5" />
           </button>
         )}
-        <div className="w-9 h-9 rounded-lg bg-[#66A3BF] flex items-center justify-center text-white shadow-sm shrink-0">
-          <GraduationCap className="w-5 h-5" />
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 shrink-0">
+          <GraduationCap className="w-5 h-5 text-white" />
         </div>
         <div>
-          <span className="text-sm sm:text-base font-bold text-[#243447] tracking-tight">
-            InternSync <span className="text-[#66A3BF]">AI</span>
+          <span className="text-sm sm:text-base font-extrabold bg-gradient-to-r from-white via-slate-200 to-cyan-400 bg-clip-text text-transparent">
+            GHR Placement Portal
           </span>
-          <span className="hidden sm:block text-[10px] text-[#667085] font-medium tracking-wide">
-            Enterprise Internship Management
+          <span className="hidden sm:block text-[10px] text-slate-400 tracking-wider uppercase font-semibold">
+            Institutional Internship Management
           </span>
         </div>
       </div>
@@ -102,7 +102,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCopilot, onToggleMobileSid
           {onOpenCopilot && (
             <button
               onClick={onOpenCopilot}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#E9F3FD] text-[#4874A0] border border-[#66A3BF]/30 hover:bg-[#66A3BF] hover:text-white transition-colors font-medium"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/20 transition-all font-semibold"
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">AI Copilot</span>
@@ -113,24 +113,24 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCopilot, onToggleMobileSid
           <div className="relative">
             <button
               onClick={() => setShowNotifications(!showNotifications)}
-              className="relative p-2 rounded-lg text-[#667085] hover:text-[#243447] hover:bg-[#E9F3FD] border border-transparent hover:border-[#D8E2E6] transition-colors"
+              className="relative p-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-transparent hover:border-slate-700 transition-all"
               aria-label="Notifications"
             >
               <Bell className="w-4 h-4" />
               {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#66A3BF] ring-2 ring-white" />
+                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-cyan-500 ring-2 ring-slate-900 animate-pulse" />
               )}
             </button>
 
             {/* Notifications Dropdown Popover */}
             {showNotifications && (
-              <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-xl bg-white border border-[#D8E2E6] shadow-xl overflow-hidden z-50">
-                <div className="px-4 py-3 border-b border-[#D8E2E6] flex items-center justify-between bg-[#E9F3FD]/40">
+              <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-slate-900/95 backdrop-blur-2xl border border-slate-700/80 shadow-2xl shadow-black/80 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-150">
+                <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between bg-slate-900/80">
                   <div className="flex items-center space-x-2">
-                    <Bell className="w-4 h-4 text-[#66A3BF]" />
-                    <span className="font-bold text-[#243447] text-xs">Notifications</span>
+                    <Bell className="w-4 h-4 text-cyan-400" />
+                    <span className="font-bold text-white text-xs">Notifications</span>
                     {unreadCount > 0 && (
-                      <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-[#66A3BF]/20 text-[#4874A0] font-semibold">
+                      <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-cyan-500/20 text-cyan-400 font-semibold">
                         {unreadCount} new
                       </span>
                     )}
@@ -138,7 +138,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCopilot, onToggleMobileSid
                   {unreadCount > 0 && (
                     <button
                       onClick={handleMarkAllRead}
-
                       className="text-[11px] text-cyan-400 hover:text-cyan-300 flex items-center space-x-1"
                     >
                       <CheckCheck className="w-3 h-3" />

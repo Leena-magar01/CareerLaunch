@@ -19,7 +19,7 @@ const AppContent: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400 text-xs">
-        Initializing GHR Placement Portal...
+        Initializing CareerLaunch...
       </div>
     );
   }
@@ -68,3 +68,4 @@ export const App: React.FC = () => {
 };
 
 export default App;
+

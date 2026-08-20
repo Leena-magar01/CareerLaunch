@@ -44,7 +44,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateLogin, onNav
             </div>
             <div>
               <span className="text-xl font-bold text-[#243447] tracking-tight">
-                InternSync <span className="text-[#66A3BF]">AI</span>
+                Career<span className="text-[#66A3BF]">Launch</span>
               </span>
               <span className="block text-[11px] text-[#667085] font-medium">Enterprise Internship Platform</span>
             </div>
@@ -100,7 +100,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateLogin, onNav
                   <span className="w-3 h-3 rounded-full bg-[#C95A5A]/60"></span>
                   <span className="w-3 h-3 rounded-full bg-[#C9963E]/60"></span>
                   <span className="w-3 h-3 rounded-full bg-[#4F8A68]/60"></span>
-                  <span className="text-xs text-[#667085] font-medium ml-2">InternSync Dashboard Preview</span>
+                  <span className="text-xs text-[#667085] font-medium ml-2">CareerLaunch Dashboard Preview</span>
                 </div>
                 <span className="badge-status bg-[#4F8A68]/10 text-[#4F8A68] border-[#4F8A68]/20">Active Lifecycle Engine</span>
               </div>
@@ -134,7 +134,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateLogin, onNav
         <section className="max-w-7xl mx-auto px-6 py-10 space-y-8">
           <div className="text-center max-w-2xl mx-auto">
             <h2 className="text-2xl font-bold text-[#243447]">Role-Based Institutional Portals</h2>
-            <p className="text-sm text-[#667085] mt-1">Select your access portal to log in to InternSync AI</p>
+            <p className="text-sm text-[#667085] mt-1">Select your access portal to log in to CareerLaunch</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -315,7 +315,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateLogin, onNav
       {/* Footer */}
       <footer className="bg-white border-t border-[#D8E2E6] px-6 py-8 text-center text-xs text-[#667085]">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span>InternSync AI &copy; 2026. Institutional Internship Management Platform.</span>
+          <span>CareerLaunch &copy; 2026. Institutional Internship Management Platform.</span>
           <div className="flex space-x-6 text-[#667085]">
             <a href="#" className="hover:text-[#243447]">Privacy Policy</a>
             <a href="#" className="hover:text-[#243447]">Terms of Service</a>
@@ -326,3 +326,4 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateLogin, onNav
     </div>
   );
 };
+

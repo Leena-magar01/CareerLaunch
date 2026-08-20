@@ -106,7 +106,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role, activeItem, onSelect, is
       </div>
 
       <div className="px-3 pt-4 border-t border-slate-200 text-[11px] text-slate-500">
-        InternSync Governance Engine v1.0
+        CareerLaunch Platform v1.0
       </div>
     </aside>
   );

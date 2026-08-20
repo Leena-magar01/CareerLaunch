@@ -88,10 +88,10 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCopilot, onToggleMobileSid
         </div>
         <div>
           <span className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
-            InternSync <span className="text-[#66A3BF]">AI</span>
+            Career<span className="text-[#66A3BF]">Launch</span>
           </span>
           <span className="hidden sm:block text-[10px] text-slate-500 tracking-wider font-semibold">
-            Institutional Internship Management
+            Internship Management Platform
           </span>
         </div>
       </div>

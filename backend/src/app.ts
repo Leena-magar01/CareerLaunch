@@ -24,6 +24,7 @@ import aiRoutes from './routes/ai';
 import verifyRoutes from './routes/verify';
 import notificationRoutes from './routes/notifications';
 import auditRoutes from './routes/audit';
+import attendanceRoutes from './routes/attendance';
 import { securityHeaders } from './middleware/security';
 
 const app = express();
@@ -83,6 +84,7 @@ app.use('/api/v1/ai', aiRoutes);
 app.use('/api/v1/verify', verifyRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/tnp/audit-logs', auditRoutes);
+app.use('/api/v1/attendance', attendanceRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { StatusBadge } from '../components/StatusBadge';
+import { AttendanceTracker } from '../components/AttendanceTracker';
 import {
   Building2, Plus, Users, Award, FileText, CheckCircle2, XCircle, Sparkles, Send,
   Edit, Trash2, PauseCircle, PlayCircle, StopCircle, Globe, MapPin, Phone, Mail,
-  Search, Filter, Briefcase, Linkedin, Github, Download, ShieldCheck
+  Search, Filter, Briefcase, Linkedin, Github, Download, ShieldCheck, Clock
 } from 'lucide-react';
 
 
@@ -19,7 +20,8 @@ export const CompanyDashboard: React.FC<CompanyDashboardProps> = ({
 }) => {
   const [company, setCompany] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [internalActiveTab, setInternalActiveTab] = useState<'vacancies' | 'profile' | 'applicants' | 'evaluations' | 'ppo'>('vacancies');
+  const [selectedInternId, setSelectedInternId] = useState<string>('');
+  const [internalActiveTab, setInternalActiveTab] = useState<'vacancies' | 'profile' | 'applicants' | 'evaluations' | 'ppo' | 'attendance'>('vacancies');
 
   const activeTab = (externalActiveTab as any) || internalActiveTab;
 
@@ -540,6 +542,15 @@ export const CompanyDashboard: React.FC<CompanyDashboardProps> = ({
           📋 Intern Evaluations
         </button>
         <button
+          onClick={() => setActiveTab('attendance')}
+          className={`px-4 py-2 rounded-xl font-semibold transition-all flex items-center space-x-1.5 ${
+            activeTab === 'attendance' ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/20' : 'bg-slate-900 text-slate-400 hover:text-white'
+          }`}
+        >
+          <Clock className="w-3.5 h-3.5" />
+          <span>Intern Attendance</span>
+        </button>
+        <button
           onClick={() => setActiveTab('ppo')}
           className={`px-4 py-2 rounded-xl font-semibold transition-all ${
             activeTab === 'ppo' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'bg-slate-900 text-slate-400 hover:text-white'
@@ -548,6 +559,40 @@ export const CompanyDashboard: React.FC<CompanyDashboardProps> = ({
           🎓 PPO Management
         </button>
       </div>
+
+      {/* TAB: INTERN ATTENDANCE TRACKER */}
+      {activeTab === 'attendance' && (
+        <div className="space-y-4">
+          {/* Intern Selector: pick from accepted applicants */}
+          <div className="glass-card p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+            <label className="text-xs font-semibold text-slate-300 shrink-0">Select Intern:</label>
+            <select
+              value={selectedInternId}
+              onChange={(e) => setSelectedInternId(e.target.value)}
+              className="bg-slate-900 border border-slate-700 text-white rounded-xl p-2.5 text-xs flex-1"
+            >
+              <option value="">-- Choose an intern to view their attendance --</option>
+              {applicants
+                .filter((a: any) => ['SELECTED', 'OFFER_ACCEPTED'].includes(a.status))
+                .map((a: any) => (
+                  <option key={a.studentId} value={a.studentId}>
+                    {a.student?.fullName} ({a.student?.department}) — {a.internship?.title || selectedVacancy?.title}
+                  </option>
+                ))}
+            </select>
+          </div>
+
+          {selectedInternId ? (
+            <AttendanceTracker studentId={selectedInternId} readOnly={false} />
+          ) : (
+            <div className="glass-card p-10 text-center space-y-2">
+              <Clock className="w-8 h-8 text-cyan-400 mx-auto" />
+              <p className="text-sm font-semibold text-white">No Intern Selected</p>
+              <p className="text-xs text-slate-400">Select an active intern from the dropdown above to review their attendance records.</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* TAB 1: VACANCIES MANAGEMENT */}
       {activeTab === 'vacancies' && (

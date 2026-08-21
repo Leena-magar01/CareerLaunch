@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { StatusBadge } from '../components/StatusBadge';
+import { AttendanceTracker } from '../components/AttendanceTracker';
 import {
   ShieldCheck, UserCheck, BarChart3, CheckCircle2, XCircle, AlertTriangle,
-  FileText, Download, User, ExternalLink, Check, X, AlertCircle, Sparkles, Filter
+  FileText, Download, User, ExternalLink, Check, X, AlertCircle, Sparkles, Filter, Clock
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
@@ -16,13 +17,19 @@ export const TNPAdminDashboard: React.FC<TNPAdminDashboardProps> = ({
   activeTab: externalActiveTab,
   onTabChange
 }) => {
-  const [internalActiveTab, setInternalActiveTab] = useState<'students' | 'offers' | 'verifications' | 'mentors' | 'analytics' | 'ppo'>('verifications');
+  const [internalActiveTab, setInternalActiveTab] = useState<'students' | 'offers' | 'verifications' | 'mentors' | 'analytics' | 'ppo' | 'attendance'>('verifications');
+  const [complianceData, setComplianceData] = useState<any>(null);
+  const [complianceLoading, setComplianceLoading] = useState(false);
 
   const activeTab = (externalActiveTab as any) || internalActiveTab;
 
   const setActiveTab = (tab: any) => {
     setInternalActiveTab(tab);
     if (onTabChange) onTabChange(tab);
+    // Auto-load attendance compliance when clicking the tab
+    if (tab === 'attendance' && !complianceData) {
+      fetchComplianceData();
+    }
   };
 
 
@@ -60,6 +67,20 @@ export const TNPAdminDashboard: React.FC<TNPAdminDashboardProps> = ({
 
   const [msg, setMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+
+  const fetchComplianceData = async () => {
+    try {
+      setComplianceLoading(true);
+      const res = await api.get('/attendance/analytics/compliance');
+      if (res.data.success) {
+        setComplianceData(res.data.data);
+      }
+    } catch (e) {
+      console.error('Failed to load compliance data', e);
+    } finally {
+      setComplianceLoading(false);
+    }
+  };
 
   const fetchTNPData = async () => {
     try {
@@ -395,6 +416,15 @@ export const TNPAdminDashboard: React.FC<TNPAdminDashboardProps> = ({
           📊 Institutional Analytics
         </button>
         <button
+          onClick={() => setActiveTab('attendance')}
+          className={`px-4 py-2 rounded-xl font-semibold transition-all flex items-center space-x-1.5 ${
+            activeTab === 'attendance' ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/20' : 'bg-slate-900 text-slate-400 hover:text-white'
+          }`}
+        >
+          <Clock className="w-3.5 h-3.5" />
+          <span>Attendance Compliance</span>
+        </button>
+        <button
           onClick={() => setActiveTab('ppo')}
           className={`px-4 py-2 rounded-xl font-semibold transition-all ${
             activeTab === 'ppo' ? 'bg-amber-600 text-white shadow-lg shadow-amber-600/20' : 'bg-slate-900 text-slate-400 hover:text-white'
@@ -403,6 +433,109 @@ export const TNPAdminDashboard: React.FC<TNPAdminDashboardProps> = ({
           💼 PPO Registry ({ppos.length})
         </button>
       </div>
+
+      {/* TAB: ATTENDANCE COMPLIANCE (AICTE 75% MANDATE) */}
+      {activeTab === 'attendance' && (
+        <div className="space-y-6">
+          {/* Header Banner */}
+          <div className="glass-card p-6 relative overflow-hidden">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center space-x-2">
+                  <Clock className="w-6 h-6 text-cyan-400" />
+                  <h3 className="text-xl font-bold text-white tracking-tight">Attendance Compliance Dashboard</h3>
+                </div>
+                <p className="text-xs text-slate-300">
+                  Monitor AICTE mandatory 75% attendance compliance across all active interns
+                </p>
+              </div>
+              <button
+                onClick={fetchComplianceData}
+                disabled={complianceLoading}
+                className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs"
+              >
+                {complianceLoading ? 'Loading...' : '↻ Refresh Compliance Data'}
+              </button>
+            </div>
+          </div>
+
+          {complianceLoading && !complianceData && (
+            <div className="glass-card p-10 text-center text-slate-400 text-xs">Loading compliance data...</div>
+          )}
+
+          {complianceData && (
+            <>
+              {/* Institutional Stats Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="bg-[#111827]/90 border border-slate-800 rounded-2xl p-5 text-center space-y-1">
+                  <span className="text-3xl font-black text-indigo-400 block">{complianceData.avgInstitutionalPercentage}%</span>
+                  <span className="text-xs text-slate-300 font-semibold">Avg Institutional Attendance</span>
+                </div>
+                <div className="bg-[#111827]/90 border border-slate-800 rounded-2xl p-5 text-center space-y-1">
+                  <span className="text-3xl font-black text-emerald-400 block">{complianceData.totalTracked}</span>
+                  <span className="text-xs text-slate-300 font-semibold">Students Being Tracked</span>
+                </div>
+                <div className="bg-[#111827]/90 border border-rose-700/40 rounded-2xl p-5 text-center space-y-1">
+                  <span className="text-3xl font-black text-rose-400 block">{complianceData.lowAttendanceCount}</span>
+                  <span className="text-xs text-rose-200/80 font-semibold">⚠️ Below 75% (AICTE Non-Compliant)</span>
+                </div>
+              </div>
+
+              {/* Student Compliance Table */}
+              <div className="glass-card p-6 space-y-4">
+                <h3 className="font-bold text-white text-base">Student-wise Attendance Summary</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="text-left text-slate-400 border-b border-slate-800">
+                        <th className="py-2 px-3 font-semibold">Student</th>
+                        <th className="py-2 px-3 font-semibold">Department</th>
+                        <th className="py-2 px-3 font-semibold">Internship</th>
+                        <th className="py-2 px-3 font-semibold text-center">Present</th>
+                        <th className="py-2 px-3 font-semibold text-center">Absent</th>
+                        <th className="py-2 px-3 font-semibold text-center">Leave</th>
+                        <th className="py-2 px-3 font-semibold text-center">%</th>
+                        <th className="py-2 px-3 font-semibold text-center">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {complianceData.students
+                        .filter((s: any) => s.stats.total > 0)
+                        .sort((a: any, b: any) => a.stats.percentage - b.stats.percentage)
+                        .map((s: any) => (
+                          <tr key={s.studentId} className={`border-b border-slate-800/60 hover:bg-slate-900/50 ${s.isLowAttendance ? 'bg-rose-950/10' : ''}`}>
+                            <td className="py-2.5 px-3 font-semibold text-white">{s.fullName}</td>
+                            <td className="py-2.5 px-3 text-slate-400">{s.department}</td>
+                            <td className="py-2.5 px-3 text-cyan-400">{s.companyName}</td>
+                            <td className="py-2.5 px-3 text-center text-emerald-400 font-bold">{s.stats.present}</td>
+                            <td className="py-2.5 px-3 text-center text-rose-400 font-bold">{s.stats.absent}</td>
+                            <td className="py-2.5 px-3 text-center text-amber-400 font-bold">{s.stats.leave}</td>
+                            <td className="py-2.5 px-3 text-center font-black">
+                              <span className={s.stats.percentage < 75 ? 'text-rose-400' : 'text-emerald-400'}>
+                                {s.stats.percentage}%
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-3 text-center">
+                              {s.isLowAttendance ? (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                                  ⚠ Non-Compliant
+                                </span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                  ✓ Compliant
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       {/* TAB 1: STUDENT PROFILE VERIFICATION QUEUE */}
       {activeTab === 'students' && (

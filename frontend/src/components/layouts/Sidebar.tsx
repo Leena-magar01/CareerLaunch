@@ -1,7 +1,6 @@
-import React from 'react';
 import {
   GraduationCap, Building2, ShieldCheck, UserCheck, Search,
-  FileText, Award, BarChart3, Settings, HelpCircle, Bot, Sparkles, CheckCircle2, LogOut
+  FileText, Award, BarChart3, Settings, HelpCircle, Bot, Sparkles, CheckCircle2, LogOut, Clock
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -37,6 +36,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role, activeItem, onSelect, is
       case 'STUDENT':
         items = [
           { id: 'marketplace', label: 'Internship Discovery', icon: <Search className="w-4 h-4" /> },
+          { id: 'attendance', label: 'Attendance Tracker', icon: <Clock className="w-4 h-4 text-cyan-500" /> },
           { id: 'applications', label: 'My Applications', icon: <FileText className="w-4 h-4" /> },
           { id: 'progress', label: 'Weekly Progress Logs', icon: <CheckCircle2 className="w-4 h-4" /> },
           { id: 'certificates', label: 'Internship Certificates', icon: <Award className="w-4 h-4" /> },
@@ -49,6 +49,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role, activeItem, onSelect, is
         items = [
           { id: 'vacancies', label: 'Vacancy Listings', icon: <Building2 className="w-4 h-4" /> },
           { id: 'applicants', label: 'AI Candidate Ranker', icon: <Sparkles className="w-4 h-4" /> },
+          { id: 'attendance', label: 'Intern Attendance Tracker', icon: <Clock className="w-4 h-4 text-cyan-500" /> },
           { id: 'evaluations', label: 'Intern Performance Rubric', icon: <Award className="w-4 h-4" /> },
           { id: 'ppo', label: 'PPO Offer Management', icon: <FileText className="w-4 h-4" /> },
         ];
@@ -58,6 +59,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role, activeItem, onSelect, is
         items = [
           { id: 'verifications', label: 'Verification Queues', icon: <ShieldCheck className="w-4 h-4" /> },
           { id: 'mentors', label: 'Faculty Mentor Assignments', icon: <UserCheck className="w-4 h-4" /> },
+          { id: 'attendance', label: 'Attendance Compliance (75%)', icon: <Clock className="w-4 h-4 text-amber-500" /> },
           { id: 'analytics', label: 'Institutional Analytics', icon: <BarChart3 className="w-4 h-4" /> },
           { id: 'ppo', label: 'PPO Conversion Registry', icon: <Award className="w-4 h-4" /> },
         ];
@@ -65,6 +67,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role, activeItem, onSelect, is
       case 'MENTOR':
         items = [
           { id: 'students', label: 'Assigned Mentees', icon: <UserCheck className="w-4 h-4" /> },
+          { id: 'attendance', label: 'Mentee Attendance Review', icon: <Clock className="w-4 h-4 text-cyan-500" /> },
           { id: 'reports', label: 'Weekly Log Review Queue', icon: <FileText className="w-4 h-4" /> },
           { id: 'evaluations', label: 'Final Mentor Rubrics', icon: <Award className="w-4 h-4" /> },
         ];

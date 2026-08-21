@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { StatusBadge } from '../components/StatusBadge';
-import { UserCheck, CheckCircle2, AlertTriangle, FileText, Send, MessageSquare } from 'lucide-react';
+import { AttendanceTracker } from '../components/AttendanceTracker';
+import { UserCheck, CheckCircle2, AlertTriangle, FileText, Send, MessageSquare, Clock } from 'lucide-react';
 
 interface MentorDashboardProps {
   activeTab?: string;
@@ -15,7 +16,8 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
   const [assignments, setAssignments] = useState<any[]>([]);
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [internalActiveTab, setInternalActiveTab] = useState<'students' | 'reports' | 'evaluations'>('students');
+  const [selectedMenteeId, setSelectedMenteeId] = useState<string>('');
+  const [internalActiveTab, setInternalActiveTab] = useState<'students' | 'reports' | 'evaluations' | 'attendance'>('students');
 
   const activeTab = (externalActiveTab as any) || internalActiveTab;
 
@@ -146,12 +148,19 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
       )}
 
       {/* Tabs */}
-      <div className="flex space-x-2 border-b border-slate-800 pb-2 text-xs">
+      <div className="flex flex-wrap gap-2 border-b border-slate-800 pb-2 text-xs">
         <button
           onClick={() => setActiveTab('students')}
           className={`px-4 py-2 rounded-xl font-semibold ${activeTab === 'students' ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-slate-400'}`}
         >
           Assigned Students ({assignments.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('attendance')}
+          className={`px-4 py-2 rounded-xl font-semibold flex items-center space-x-1.5 ${activeTab === 'attendance' ? 'bg-cyan-600 text-white' : 'bg-slate-900 text-slate-400'}`}
+        >
+          <Clock className="w-3.5 h-3.5" />
+          <span>Mentee Attendance Review</span>
         </button>
         <button
           onClick={() => setActiveTab('reports')}
@@ -166,6 +175,38 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({
           Final Mentor Evaluation Rubric
         </button>
       </div>
+
+      {/* TAB: MENTEE ATTENDANCE REVIEW */}
+      {activeTab === 'attendance' && (
+        <div className="space-y-4">
+          {/* Mentee Selector */}
+          <div className="glass-card p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+            <label className="text-xs font-semibold text-slate-300 shrink-0">Select Mentee:</label>
+            <select
+              value={selectedMenteeId}
+              onChange={(e) => setSelectedMenteeId(e.target.value)}
+              className="bg-slate-900 border border-slate-700 text-white rounded-xl p-2.5 text-xs flex-1"
+            >
+              <option value="">-- Choose a Mentee to review attendance --</option>
+              {assignments.map((a) => (
+                <option key={a.studentId} value={a.studentId}>
+                  {a.student?.fullName} ({a.student?.department}) — {a.internship?.title}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {selectedMenteeId ? (
+            <AttendanceTracker studentId={selectedMenteeId} readOnly={false} />
+          ) : (
+            <div className="glass-card p-10 text-center space-y-2">
+              <Clock className="w-8 h-8 text-cyan-400 mx-auto" />
+              <p className="text-sm font-semibold text-white">No Mentee Selected</p>
+              <p className="text-xs text-slate-400">Please choose a mentee from the dropdown above to review their attendance calendar.</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* TAB 1: ASSIGNED STUDENTS */}
       {activeTab === 'students' && (

@@ -3,6 +3,7 @@ import { api } from '../services/api';
 import { StatusBadge } from '../components/StatusBadge';
 import { EligibilityCard } from '../components/EligibilityCard';
 import { CertificateModal } from '../components/CertificateModal';
+import { AttendanceTracker } from '../components/AttendanceTracker';
 import {
   GraduationCap, Search, CheckCircle2, ShieldCheck, Sparkles,
   FileText, Clock, Award, Briefcase, Building2, Plus, Send, AlertTriangle,
@@ -19,7 +20,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
   activeTab: externalActiveTab,
   onTabChange
 }) => {
-  const [internalActiveTab, setInternalActiveTab] = useState<'profile' | 'marketplace' | 'applications' | 'progress' | 'certificates' | 'skillgap' | 'resume'>('marketplace');
+  const [internalActiveTab, setInternalActiveTab] = useState<'profile' | 'marketplace' | 'applications' | 'progress' | 'certificates' | 'skillgap' | 'resume' | 'attendance'>('marketplace');
   const [selectedCertForModal, setSelectedCertForModal] = useState<any | null>(null);
 
   const activeTab = (externalActiveTab as any) || internalActiveTab;
@@ -1876,6 +1877,13 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             )}
           </div>
         </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* TAB: DAILY ATTENDANCE TRACKER */}
+      {/* ======================================================== */}
+      {activeTab === 'attendance' && (
+        <AttendanceTracker />
       )}
 
       {/* ======================================================== */}

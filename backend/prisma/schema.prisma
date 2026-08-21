@@ -66,6 +66,7 @@ model StudentProfile {
   evaluations       Evaluation[]
   completions       Completion[]
   ppos              PPO[]
+  attendances       Attendance[]
 
   @@index([department])
   @@index([profileStatus])
@@ -197,6 +198,7 @@ model Internship {
   evaluations       Evaluation[]
   completions       Completion[]
   ppos              PPO[]
+  attendances       Attendance[]
 
   @@index([companyId])
   @@index([status])
@@ -484,4 +486,30 @@ model AuditLog {
   @@index([action])
   @@index([entityType])
   @@index([createdAt])
+}
+
+model Attendance {
+  id                 String         @id @default(uuid())
+  studentId          String
+  student            StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  internshipId       String?
+  internship         Internship?    @relation(fields: [internshipId], references: [id], onDelete: SetNull)
+  date               String         // YYYY-MM-DD
+  status             String         @default("PRESENT") // PRESENT, ABSENT, LEAVE, HALF_DAY
+  checkIn            String?        // e.g. "06:17 AM"
+  checkOut           String?        // e.g. "05:30 PM"
+  isCurrentlyWorking Boolean        @default(false)
+  workingMode        String         @default("OFFICE") // OFFICE, REMOTE, HYBRID
+  source             String         @default("LIVE") // LIVE, SELF_ADDED, MENTOR_MARKED, COMPANY_MARKED
+  remarks            String?
+  verifiedByMentor   Boolean        @default(false)
+  verifiedByCompany  Boolean        @default(false)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @default(now()) @updatedAt
+
+  @@unique([studentId, date])
+  @@index([studentId])
+  @@index([internshipId])
+  @@index([date])
+  @@index([status])
 }

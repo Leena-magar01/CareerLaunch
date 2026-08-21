@@ -1,11 +1,13 @@
-// Prisma Schema for CareerLaunch — PostgreSQL (Production)
+// Prisma Schema for CareerLaunch
+// Local dev: SQLite (DATABASE_URL="file:./dev.db")
+// Production: PostgreSQL (DATABASE_URL="postgresql://...")
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = env("DATABASE_PROVIDER")
   url      = env("DATABASE_URL")
 }
 

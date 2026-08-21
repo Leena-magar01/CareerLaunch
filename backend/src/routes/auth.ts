@@ -222,38 +222,34 @@ router.post('/google', async (req, res) => {
       // Generate a random unusable password hash — Google users never use password login
       const passwordHash = await bcrypt.hash(`google_${googleId || Date.now()}_${Math.random()}`, 10);
 
-      user = await prisma.user.create({
+      const createdUser = await prisma.user.create({
         data: {
           email: googleEmail,
           passwordHash,
           role: assignedRole,
           status: 'ACTIVE',
-        },
-        include: {
-          studentProfile: true,
-          companyProfile: true,
-          mentorProfile: true,
         }
-      }) as any;
+      });
 
       // Create matching role profile
       if (assignedRole === 'STUDENT') {
         const studentCode = 'STU-' + Math.floor(100000 + Math.random() * 900000);
         await prisma.studentProfile.create({
           data: {
-            userId: user!.id,
+            userId: createdUser.id,
             fullName: googleName,
             studentCode,
             department: 'CSE',
             passingYear: 2026,
             cgpa: 8.5,
             backlogs: 0,
+            profileStatus: 'VERIFIED',
           }
         });
       } else if (assignedRole === 'COMPANY') {
         await prisma.companyProfile.create({
           data: {
-            userId: user!.id,
+            userId: createdUser.id,
             name: `${googleName} Enterprise`,
             industry: 'Technology',
             location: 'India',
@@ -264,7 +260,7 @@ router.post('/google', async (req, res) => {
       } else if (assignedRole === 'MENTOR') {
         await prisma.mentorProfile.create({
           data: {
-            userId: user!.id,
+            userId: createdUser.id,
             fullName: googleName,
             department: 'CSE',
             designation: 'Assistant Professor',
@@ -274,13 +270,13 @@ router.post('/google', async (req, res) => {
 
       // Re-fetch with profiles included
       user = await prisma.user.findUnique({
-        where: { id: user!.id },
+        where: { id: createdUser.id },
         include: {
           studentProfile: { include: { skills: true, projects: true, experiences: true, certifications: true } },
           companyProfile: true,
           mentorProfile: true,
         }
-      }) as any;
+      });
     }
 
     // Build profile data with completeness score for students

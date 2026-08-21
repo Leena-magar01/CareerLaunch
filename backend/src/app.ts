@@ -81,6 +81,13 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'Internship Management System Backend', time: new Date() });
 });
 
+// Serve React SPA for all non-API routes (production)
+const frontendDist = path.resolve(process.cwd(), '../frontend/dist');
+app.use(express.static(frontendDist));
+app.get('*', (_req, res) => {
+  res.sendFile(path.join(frontendDist, 'index.html'));
+});
+
 // Global Error Handler
 app.use(errorHandler);
 

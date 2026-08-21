@@ -4,6 +4,7 @@
   "private": true,
   "description": "AI-Powered Internship Management System Monorepo Root",
   "scripts": {
+    "dev": "concurrently --kill-others-on-fail --names \"BACKEND,FRONTEND\" --prefix-colors \"cyan,magenta\" \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
     "build:backend": "cd backend && npm run build",
@@ -17,6 +18,7 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
+    "concurrently": "^10.0.5",
     "jest": "^29.7.0",
     "ts-jest": "^29.1.2",
     "typescript": "^5.3.3"

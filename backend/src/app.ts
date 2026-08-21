@@ -28,7 +28,24 @@ import { securityHeaders } from './middleware/security';
 const app = express();
 
 app.use(securityHeaders);
-app.use(cors());
+
+// Allow frontend origin in both dev and production
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  process.env.FRONTEND_URL, // Set this on Railway to your Vercel URL
+].filter(Boolean) as string[];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. mobile apps, Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS: origin ${origin} not allowed`));
+  },
+  credentials: true,
+}));
+
 app.use(express.json());
 app.use(requestLogger);
 

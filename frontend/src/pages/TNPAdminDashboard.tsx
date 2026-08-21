@@ -241,19 +241,41 @@ export const TNPAdminDashboard: React.FC<TNPAdminDashboardProps> = ({
 
   const handleAssignMentor = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedStudentId || !selectedInternshipId || !selectedMentorId) return;
+    if (!selectedStudentId || !selectedInternshipId || !selectedMentorId) {
+      setErrorMsg('Please select a faculty mentor, student candidate, and internship.');
+      return;
+    }
+    setErrorMsg('');
+    setMsg('');
     try {
-      const res = await api.post('/tnp/mentor-assignments', {
-        studentId: selectedStudentId,
-        internshipId: selectedInternshipId,
-        mentorId: selectedMentorId
-      });
-      if (res.data.success) {
+      let res;
+      try {
+        res = await api.post('/tnp/mentor-assignments', {
+          studentId: selectedStudentId,
+          internshipId: selectedInternshipId,
+          mentorId: selectedMentorId
+        });
+      } catch (err: any) {
+        if (err.response?.status === 404) {
+          res = await api.post('/tnp/assignments', {
+            studentId: selectedStudentId,
+            internshipId: selectedInternshipId,
+            mentorId: selectedMentorId
+          });
+        } else {
+          throw err;
+        }
+      }
+
+      if (res?.data?.success) {
         setMsg('Faculty mentor assigned successfully!');
+        setSelectedStudentId('');
+        setSelectedInternshipId('');
+        setSelectedMentorId('');
         fetchTNPData();
       }
     } catch (e: any) {
-      setErrorMsg(e.response?.data?.error?.message || 'Failed to assign mentor');
+      setErrorMsg(e.response?.data?.error?.message || e.message || 'Failed to assign mentor');
     }
   };
 

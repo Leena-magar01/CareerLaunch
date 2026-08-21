@@ -61,18 +61,27 @@ router.get('/students/pending', authenticateJwt, authorizeRoles('TNP', 'ADMIN'),
       orderBy: { updatedAt: 'desc' }
     });
 
-    // Attach document count and authoritative completeness for each
-    const populated = await Promise.all(students.map(async (student) => {
-      const documents = await prisma.document.findMany({
-        where: { ownerUserId: student.userId }
-      });
-      const completeness = calculateProfileCompleteness(student, documents.length);
+    // Attach document count and authoritative completeness for each via single batch query
+    const userIds = students.map(s => s.userId).filter(Boolean);
+    const allDocs = userIds.length > 0 ? await prisma.document.findMany({
+      where: { ownerUserId: { in: userIds } }
+    }) : [];
+
+    const docMap = new Map<string, any[]>();
+    for (const doc of allDocs) {
+      if (!docMap.has(doc.ownerUserId)) docMap.set(doc.ownerUserId, []);
+      docMap.get(doc.ownerUserId)!.push(doc);
+    }
+
+    const populated = students.map((student) => {
+      const docs = docMap.get(student.userId) || [];
+      const completeness = calculateProfileCompleteness(student, docs.length);
       return {
         ...student,
-        documents,
+        documents: docs,
         completeness
       };
-    }));
+    });
 
     return res.json({ success: true, data: populated });
   } catch (err: any) {

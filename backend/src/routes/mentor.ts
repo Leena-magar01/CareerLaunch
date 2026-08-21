@@ -57,7 +57,7 @@ router.get('/mentors', authenticateJwt, authorizeRoles('TNP', 'ADMIN'), handleGe
 router.get('/mentors/workload', authenticateJwt, authorizeRoles('TNP', 'ADMIN'), handleGetMentorsList);
 
 // POST /api/v1/tnp/mentor-assignments & /api/v1/mentors/assignments - Assign Faculty Mentor
-router.post('/assignments', authenticateJwt, authorizeRoles('TNP', 'ADMIN'), async (req: AuthRequest, res) => {
+const handleAssignMentor = async (req: AuthRequest, res: any) => {
   try {
     const { studentId, internshipId, mentorId, remarks } = req.body;
 
@@ -137,10 +137,13 @@ router.post('/assignments', authenticateJwt, authorizeRoles('TNP', 'ADMIN'), asy
   } catch (err: any) {
     return res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: err.message } });
   }
-});
+};
+
+router.post('/assignments', authenticateJwt, authorizeRoles('TNP', 'ADMIN'), handleAssignMentor);
+router.post('/mentor-assignments', authenticateJwt, authorizeRoles('TNP', 'ADMIN'), handleAssignMentor);
 
 // POST /api/v1/tnp/mentor-assignments/:id/reassign - Reassign to a new Faculty Mentor
-router.post('/assignments/:id/reassign', authenticateJwt, authorizeRoles('TNP', 'ADMIN'), async (req: AuthRequest, res) => {
+const handleReassignMentor = async (req: AuthRequest, res: any) => {
   try {
     const { newMentorId, reason } = req.body;
 
@@ -224,7 +227,10 @@ router.post('/assignments/:id/reassign', authenticateJwt, authorizeRoles('TNP', 
   } catch (err: any) {
     return res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: err.message } });
   }
-});
+};
+
+router.post('/assignments/:id/reassign', authenticateJwt, authorizeRoles('TNP', 'ADMIN'), handleReassignMentor);
+router.post('/mentor-assignments/:id/reassign', authenticateJwt, authorizeRoles('TNP', 'ADMIN'), handleReassignMentor);
 
 // GET /api/v1/mentors/me/assignments - Mentor view assigned students and details
 router.get('/me/assignments', authenticateJwt, authorizeRoles('MENTOR'), async (req: AuthRequest, res) => {

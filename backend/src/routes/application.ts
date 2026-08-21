@@ -286,18 +286,27 @@ router.get('/internships/:id/applications', authenticateJwt, authorizeRoles('COM
       orderBy: { aiMatchScore: 'desc' } // Ranked by explainable match score
     });
 
-    // Populate authoritative completeness and documents for each candidate
-    const populated = await Promise.all(applications.map(async (app) => {
-      const docs = await prisma.document.findMany({
-        where: { ownerUserId: app.student.userId }
-      });
+    // Populate authoritative completeness and documents for each candidate via single batch query
+    const userIds = applications.map(a => a.student.userId).filter(Boolean);
+    const allDocs = userIds.length > 0 ? await prisma.document.findMany({
+      where: { ownerUserId: { in: userIds } }
+    }) : [];
+
+    const docMap = new Map<string, any[]>();
+    for (const doc of allDocs) {
+      if (!docMap.has(doc.ownerUserId)) docMap.set(doc.ownerUserId, []);
+      docMap.get(doc.ownerUserId)!.push(doc);
+    }
+
+    const populated = applications.map((app) => {
+      const docs = docMap.get(app.student.userId) || [];
       const completeness = calculateProfileCompleteness(app.student, docs.length);
       return {
         ...app,
         documents: docs,
         completeness
       };
-    }));
+    });
 
     return res.json({ success: true, data: populated });
   } catch (err: any) {

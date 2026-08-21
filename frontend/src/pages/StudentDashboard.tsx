@@ -2099,6 +2099,39 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
               ))}
             </div>
           )}
+
+          {/* External Certifications & Credentials Portfolio */}
+          <div className="glass-card p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <FileText className="w-5 h-5 text-cyan-400" />
+                <h4 className="text-base font-bold text-white">External Certifications & Verified Credentials ({profile?.certifications?.length || 0})</h4>
+              </div>
+              <button
+                onClick={() => { setActiveTab('profile'); setProfileTab('certifications'); }}
+                className="btn-secondary text-xs py-1.5 px-3 flex items-center space-x-1 hover:text-cyan-300"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Certification</span>
+              </button>
+            </div>
+
+            {(!profile?.certifications || profile.certifications.length === 0) ? (
+              <p className="text-xs text-slate-400">No external course or industry certifications added yet. Click above to add them under your academic profile.</p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {profile.certifications.map((c: any) => (
+                  <div key={c.id} className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1 text-xs">
+                    <div className="flex items-center justify-between">
+                      <h5 className="font-bold text-white">{c.name}</h5>
+                      <span className="text-[10px] font-mono text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/20">RECORDED</span>
+                    </div>
+                    <p className="text-slate-400 text-[11px]">{c.issuer} {c.issueDate ? `&bull; Issued: ${c.issueDate}` : ''}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 

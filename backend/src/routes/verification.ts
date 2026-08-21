@@ -39,9 +39,9 @@ router.get('/students/pending', authenticateJwt, authorizeRoles('TNP', 'ADMIN'),
     const { status, department } = req.query;
 
     const whereClause: any = {};
-    if (status) {
+    if (status && String(status).toUpperCase() !== 'ALL') {
       whereClause.profileStatus = String(status);
-    } else {
+    } else if (!status) {
       whereClause.profileStatus = { in: ['SUBMITTED', 'UNDER_REVIEW', 'CORRECTION_REQUIRED', 'DRAFT'] };
     }
 

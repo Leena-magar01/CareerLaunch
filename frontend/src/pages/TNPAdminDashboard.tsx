@@ -35,6 +35,8 @@ export const TNPAdminDashboard: React.FC<TNPAdminDashboardProps> = ({
   const [mentors, setMentors] = useState<any[]>([]);
   const [analytics, setAnalytics] = useState<any>(null);
   const [ppos, setPpos] = useState<any[]>([]);
+  const [allStudents, setAllStudents] = useState<any[]>([]);
+  const [allInternships, setAllInternships] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Student Review Modal State
@@ -61,26 +63,56 @@ export const TNPAdminDashboard: React.FC<TNPAdminDashboardProps> = ({
 
   const fetchTNPData = async () => {
     try {
-      const statsRes = await api.get('/tnp/students/stats');
-      if (statsRes.data.success) setStudentStats(statsRes.data.data);
+      const [
+        statsRes,
+        sRes,
+        allStudRes,
+        offRes,
+        intRes,
+        vRes,
+        mRes,
+        aRes,
+        pRes
+      ] = await Promise.allSettled([
+        api.get('/tnp/students/stats'),
+        api.get('/tnp/students/pending'),
+        api.get('/tnp/students/pending?status=ALL'),
+        api.get('/tnp/offers'),
+        api.get('/internships?status=ALL&limit=100'),
+        api.get('/tnp/verification-queue'),
+        api.get('/tnp/list'),
+        api.get('/analytics/overview'),
+        api.get('/tnp/ppo')
+      ]);
 
-      const sRes = await api.get('/tnp/students/pending');
-      if (sRes.data.success) setStudentsList(sRes.data.data);
-
-      const offRes = await api.get('/tnp/offers');
-      if (offRes.data.success) setOffersList(offRes.data.data);
-
-      const vRes = await api.get('/tnp/verification-queue');
-      if (vRes.data.success) setVerifications(vRes.data.data);
-
-      const mRes = await api.get('/tnp/list');
-      if (mRes.data.success) setMentors(mRes.data.data);
-
-      const aRes = await api.get('/analytics/overview');
-      if (aRes.data.success) setAnalytics(aRes.data.data);
-
-      const pRes = await api.get('/tnp/ppo');
-      if (pRes.data.success) setPpos(pRes.data.data);
+      if (statsRes.status === 'fulfilled' && statsRes.value.data.success) {
+        setStudentStats(statsRes.value.data.data);
+      }
+      if (sRes.status === 'fulfilled' && sRes.value.data.success) {
+        setStudentsList(sRes.value.data.data);
+      }
+      if (allStudRes.status === 'fulfilled' && allStudRes.value.data.success) {
+        setAllStudents(allStudRes.value.data.data);
+      }
+      if (offRes.status === 'fulfilled' && offRes.value.data.success) {
+        setOffersList(offRes.value.data.data);
+      }
+      if (intRes.status === 'fulfilled' && intRes.value.data.success) {
+        const intList = intRes.value.data.data?.internships || (Array.isArray(intRes.value.data.data) ? intRes.value.data.data : []);
+        setAllInternships(intList);
+      }
+      if (vRes.status === 'fulfilled' && vRes.value.data.success) {
+        setVerifications(vRes.value.data.data);
+      }
+      if (mRes.status === 'fulfilled' && mRes.value.data.success) {
+        setMentors(mRes.value.data.data);
+      }
+      if (aRes.status === 'fulfilled' && aRes.value.data.success) {
+        setAnalytics(aRes.value.data.data);
+      }
+      if (pRes.status === 'fulfilled' && pRes.value.data.success) {
+        setPpos(pRes.value.data.data);
+      }
     } catch (e) {
       console.error('Failed to fetch T&P data:', e);
     } finally {
@@ -906,28 +938,50 @@ export const TNPAdminDashboard: React.FC<TNPAdminDashboardProps> = ({
               </div>
 
               <div>
-                <label className="text-slate-300 block mb-1">Student ID (UUID)</label>
-                <input
-                  type="text"
-                  placeholder="Enter Student Profile ID..."
+                <label className="text-slate-300 block mb-1 font-semibold">Select Student Candidate</label>
+                <select
+                  required
                   value={selectedStudentId}
-                  onChange={(e) => setSelectedStudentId(e.target.value)}
+                  onChange={(e) => {
+                    const sId = e.target.value;
+                    setSelectedStudentId(sId);
+                    // Auto-select corresponding internship if this student has an offer or application
+                    const matchingOffer = offersList.find(
+                      (o: any) => o.application?.studentId === sId || o.application?.student?.id === sId
+                    );
+                    if (matchingOffer?.application?.internshipId) {
+                      setSelectedInternshipId(matchingOffer.application.internshipId);
+                    }
+                  }}
                   className="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2.5"
-                />
+                >
+                  <option value="">-- Choose Student Candidate --</option>
+                  {(allStudents.length > 0 ? allStudents : studentsList).map((s: any) => (
+                    <option key={s.id} value={s.id}>
+                      {s.fullName} ({s.department} &bull; ID: {s.studentCode})
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>
-                <label className="text-slate-300 block mb-1">Internship ID (UUID)</label>
-                <input
-                  type="text"
-                  placeholder="Enter Internship ID..."
+                <label className="text-slate-300 block mb-1 font-semibold">Select Internship Vacancy / Opportunity</label>
+                <select
+                  required
                   value={selectedInternshipId}
                   onChange={(e) => setSelectedInternshipId(e.target.value)}
                   className="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2.5"
-                />
+                >
+                  <option value="">-- Choose Internship Vacancy --</option>
+                  {allInternships.map((i: any) => (
+                    <option key={i.id} value={i.id}>
+                      {i.title} &mdash; {i.company?.name || 'Partner Company'} ({i.durationMonths} Months)
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              <button type="submit" className="w-full btn-primary text-xs py-2.5">
+              <button type="submit" className="w-full btn-primary text-xs py-2.5 font-bold">
                 Assign Faculty Mentor
               </button>
             </form>

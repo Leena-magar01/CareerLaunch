@@ -4,7 +4,7 @@ import { StatusBadge } from '../components/StatusBadge';
 import {
   Building2, Plus, Users, Award, FileText, CheckCircle2, XCircle, Sparkles, Send,
   Edit, Trash2, PauseCircle, PlayCircle, StopCircle, Globe, MapPin, Phone, Mail,
-  Search, Filter, Briefcase, Linkedin, Github
+  Search, Filter, Briefcase, Linkedin, Github, Download, ShieldCheck
 } from 'lucide-react';
 
 
@@ -100,6 +100,25 @@ export const CompanyDashboard: React.FC<CompanyDashboardProps> = ({
 
   const [msg, setMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+
+  const handleDownloadDocument = async (docId: string, originalName: string) => {
+    try {
+      const res = await api.get(`/documents/${docId}/file`, { responseType: 'blob' });
+      const contentType = (res.headers['content-type'] as string) || 'application/pdf';
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: contentType }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', originalName || 'student_document.pdf');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => window.URL.revokeObjectURL(url), 10000);
+    } catch (err: any) {
+      const token = localStorage.getItem('token');
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
+      window.open(`${baseUrl}/documents/${docId}/file?token=${token}`, '_blank');
+    }
+  };
 
   const fetchCompanyData = async () => {
     try {
@@ -821,7 +840,11 @@ export const CompanyDashboard: React.FC<CompanyDashboardProps> = ({
                           <h4 className="font-bold text-[#243447] text-base">{app.student?.fullName}</h4>
                           <button
                             onClick={() => {
-                              setSelectedStudentForModal(app.student);
+                              setSelectedStudentForModal({
+                                ...app.student,
+                                documents: app.documents || [],
+                                certifications: app.student?.certifications || []
+                              });
                               setShowStudentProfileModal(true);
                             }}
                             className="px-2 py-0.5 rounded-md bg-[#E9F3FD] text-[#4874A0] text-[11px] font-semibold border border-[#66A3BF]/30 hover:bg-[#66A3BF] hover:text-white transition-colors"
@@ -1444,6 +1467,58 @@ export const CompanyDashboard: React.FC<CompanyDashboardProps> = ({
                   <span className="text-[#667085]">React, Node.js, TypeScript, Data Analysis, SQL</span>
                 )}
               </div>
+            </div>
+
+            {/* Certifications Section */}
+            <div className="space-y-2 text-xs">
+              <span className="font-semibold text-[#243447] flex items-center space-x-1.5">
+                <Award className="w-4 h-4 text-amber-500" />
+                <span>Verified Certifications & Accreditations ({selectedStudentForModal.certifications?.length || 0})</span>
+              </span>
+              {(!selectedStudentForModal.certifications || selectedStudentForModal.certifications.length === 0) ? (
+                <p className="text-slate-400 italic text-[11px]">No formal certifications recorded on profile.</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {selectedStudentForModal.certifications.map((c: any) => (
+                    <div key={c.id} className="p-2.5 rounded-lg bg-[#E9F3FD]/50 border border-[#D8E2E6] space-y-0.5">
+                      <p className="font-bold text-[#243447] text-xs">{c.name}</p>
+                      <p className="text-[11px] text-[#667085]">{c.issuer} {c.issueDate ? `• Issued: ${c.issueDate}` : ''}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Attached Verification Documents (Resume & Certificates) */}
+            <div className="space-y-2 text-xs">
+              <span className="font-semibold text-[#243447] flex items-center space-x-1.5">
+                <FileText className="w-4 h-4 text-cyan-600" />
+                <span>Attached Documents & Certificates ({selectedStudentForModal.documents?.length || 0})</span>
+              </span>
+              {(!selectedStudentForModal.documents || selectedStudentForModal.documents.length === 0) ? (
+                <p className="text-slate-400 italic text-[11px]">No uploaded certificate or resume documents attached.</p>
+              ) : (
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                  {selectedStudentForModal.documents.map((doc: any) => (
+                    <div key={doc.id} className="p-2.5 rounded-lg bg-slate-50 border border-[#D8E2E6] flex items-center justify-between gap-2">
+                      <div className="flex items-center space-x-2 min-w-0">
+                        <FileText className="w-4 h-4 text-cyan-600 shrink-0" />
+                        <div className="truncate">
+                          <span className="font-bold text-[#243447] text-xs block truncate">{doc.originalName}</span>
+                          <span className="text-[10px] text-[#667085] font-mono">{doc.documentType} &bull; {(doc.size / 1024).toFixed(1)} KB</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleDownloadDocument(doc.id, doc.originalName)}
+                        className="btn-secondary text-[11px] py-1 px-3 flex items-center space-x-1 hover:text-cyan-600 shrink-0 font-semibold cursor-pointer"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span>View / Download</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end pt-3 border-t border-[#D8E2E6]">

@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import { ENV } from './config/env';
 import { requestLogger } from './middleware/requestLogger';
 import { errorHandler } from './middleware/error';
@@ -88,12 +89,23 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'Internship Management System Backend', time: new Date() });
 });
 
-// Serve React SPA for all non-API routes (production)
+// Serve React SPA for all non-API routes (if built) or return API status
 const frontendDist = path.resolve(process.cwd(), '../frontend/dist');
-app.use(express.static(frontendDist));
-app.get('*', (_req, res) => {
-  res.sendFile(path.join(frontendDist, 'index.html'));
-});
+if (fs.existsSync(path.join(frontendDist, 'index.html'))) {
+  app.use(express.static(frontendDist));
+  app.get('*', (_req, res) => {
+    res.sendFile(path.join(frontendDist, 'index.html'));
+  });
+} else {
+  app.get('/', (_req, res) => {
+    res.json({
+      status: 'ok',
+      service: 'CareerLaunch Backend API',
+      version: '1.0.0',
+      time: new Date()
+    });
+  });
+}
 
 // Global Error Handler
 app.use(errorHandler);

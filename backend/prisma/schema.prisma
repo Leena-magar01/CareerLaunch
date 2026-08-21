@@ -1,15 +1,17 @@
 // Prisma Schema for CareerLaunch
-// Local dev: SQLite (DATABASE_URL="file:./dev.db")
-// Production: PostgreSQL (DATABASE_URL="postgresql://...")
+// Provider is hardcoded to postgresql (required by Prisma — env() not allowed in provider)
+// Local dev: use DATABASE_URL pointing to local postgres or Render external URL
+// Production: DATABASE_URL set via Render environment variable
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = env("DATABASE_PROVIDER")
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 
 model User {
   id           String   @id @default(uuid())

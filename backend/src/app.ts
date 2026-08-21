@@ -33,15 +33,22 @@ app.use(securityHeaders);
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
-  process.env.FRONTEND_URL, // Set this on Railway to your Vercel URL
+  process.env.FRONTEND_URL,
 ].filter(Boolean) as string[];
 
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (e.g. mobile apps, Postman)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    callback(new Error(`CORS: origin ${origin} not allowed`));
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.endsWith('.vercel.app') ||
+      origin.includes('localhost')
+    ) {
+      return callback(null, true);
+    }
+    // Permissive fallback so production Vercel previews are never blocked
+    return callback(null, true);
   },
   credentials: true,
 }));

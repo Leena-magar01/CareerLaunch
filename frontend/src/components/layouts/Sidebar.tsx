@@ -39,6 +39,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role, activeItem, onSelect, is
           { id: 'marketplace', label: 'Internship Discovery', icon: <Search className="w-4 h-4" /> },
           { id: 'applications', label: 'My Applications', icon: <FileText className="w-4 h-4" /> },
           { id: 'progress', label: 'Weekly Progress Logs', icon: <CheckCircle2 className="w-4 h-4" /> },
+          { id: 'certificates', label: 'Internship Certificates', icon: <Award className="w-4 h-4" /> },
           { id: 'profile', label: 'Profile & Academic Details', icon: <GraduationCap className="w-4 h-4" /> },
           { id: 'skillgap', label: 'AI Skill-Gap Analyzer', icon: <Sparkles className="w-4 h-4" /> },
           { id: 'resume', label: 'AI Resume Analyzer', icon: <Bot className="w-4 h-4" /> },

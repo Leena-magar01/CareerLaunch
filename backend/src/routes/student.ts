@@ -30,7 +30,11 @@ router.get('/me', authenticateJwt, authorizeRoles('STUDENT'), async (req: AuthRe
         },
         progressReports: true,
         evaluations: true,
-        completions: true,
+        completions: {
+          include: {
+            internship: { include: { company: true } }
+          }
+        },
         ppos: { include: { company: true } }
       }
     });

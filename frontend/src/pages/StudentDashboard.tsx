@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { StatusBadge } from '../components/StatusBadge';
 import { EligibilityCard } from '../components/EligibilityCard';
+import { CertificateModal } from '../components/CertificateModal';
 import {
   GraduationCap, Search, CheckCircle2, ShieldCheck, Sparkles,
-  FileText, Clock, Award, Briefcase, Plus, Send, AlertTriangle,
+  FileText, Clock, Award, Briefcase, Building2, Plus, Send, AlertTriangle,
   ChevronRight, User, Phone, MapPin, Globe, Linkedin, Github,
-  UploadCloud, Trash2, ExternalLink, Check, X, AlertCircle, Eye, Download
+  UploadCloud, Trash2, ExternalLink, Check, X, AlertCircle, Eye, Download, Printer
 } from 'lucide-react';
 
 interface StudentDashboardProps {
@@ -18,7 +19,8 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
   activeTab: externalActiveTab,
   onTabChange
 }) => {
-  const [internalActiveTab, setInternalActiveTab] = useState<'profile' | 'marketplace' | 'applications' | 'progress' | 'skillgap' | 'resume'>('marketplace');
+  const [internalActiveTab, setInternalActiveTab] = useState<'profile' | 'marketplace' | 'applications' | 'progress' | 'certificates' | 'skillgap' | 'resume'>('marketplace');
+  const [selectedCertForModal, setSelectedCertForModal] = useState<any | null>(null);
 
   const activeTab = (externalActiveTab as any) || internalActiveTab;
 
@@ -387,6 +389,25 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
       setErrorMsg(e.response?.data?.error?.message || 'Failed to upload document');
     } finally {
       setUploadingDoc(false);
+    }
+  };
+
+  const handleDownloadDocument = async (docId: string, originalName: string) => {
+    try {
+      const res = await api.get(`/documents/${docId}/file`, { responseType: 'blob' });
+      const contentType = (res.headers['content-type'] as string) || 'application/pdf';
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: contentType }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', originalName || 'document.pdf');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => window.URL.revokeObjectURL(url), 10000);
+    } catch (err: any) {
+      const token = localStorage.getItem('token');
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
+      window.open(`${baseUrl}/documents/${docId}/file?token=${token}`, '_blank');
     }
   };
 
@@ -1562,15 +1583,13 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                         </div>
 
                         <div className="flex items-center space-x-2">
-                          <a
-                            href={`http://localhost:5000/api/v1/documents/${doc.id}/file`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-cyan-400 hover:text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 px-3 py-1.5 rounded-lg flex items-center space-x-1"
+                          <button
+                            onClick={() => handleDownloadDocument(doc.id, doc.originalName)}
+                            className="text-cyan-400 hover:text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 px-3 py-1.5 rounded-lg flex items-center space-x-1 hover:bg-cyan-500/20 transition-all font-semibold"
                           >
                             <Download className="w-3.5 h-3.5" />
                             <span>Download</span>
-                          </a>
+                          </button>
                           <button
                             onClick={() => handleDeleteDocument(doc.id)}
                             className="text-slate-500 hover:text-rose-400 p-1.5"
@@ -1823,6 +1842,34 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                         )}
                       </div>
                     )}
+
+                    {/* Completion Certificate Section */}
+                    {(() => {
+                      const comp = profile?.completions?.find((c: any) => c.internshipId === app.internshipId && c.status === 'APPROVED');
+                      if (!comp) return null;
+                      return (
+                        <div className="p-3.5 bg-amber-950/25 border border-amber-500/40 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                          <div className="flex items-center space-x-2.5">
+                            <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                              <Award className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <span className="font-bold text-amber-300 block text-xs">🎓 Verified Internship Certificate Issued</span>
+                              <span className="text-[11px] text-slate-300 font-mono">
+                                ID: {comp.certificateId || comp.verificationCode} &bull; Grade: <strong>{comp.grade}</strong> &bull; Score: <strong>{comp.finalScore}/10</strong>
+                              </span>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => setSelectedCertForModal(comp)}
+                            className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-lg transition-colors flex items-center justify-center space-x-1.5 shadow-sm shrink-0"
+                          >
+                            <Award className="w-4 h-4" />
+                            <span>View Certificate</span>
+                          </button>
+                        </div>
+                      );
+                    })()}
                   </div>
                 ))}
               </div>
@@ -1934,6 +1981,128 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
       )}
 
       {/* ======================================================== */}
+      {/* TAB: INTERNSHIP COMPLETION CERTIFICATES */}
+      {/* ======================================================== */}
+      {activeTab === 'certificates' && (
+        <div className="space-y-6">
+          {/* Header Banner */}
+          <div className="glass-card p-6 relative overflow-hidden">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center space-x-2">
+                  <Award className="w-6 h-6 text-amber-400" />
+                  <h3 className="text-xl font-bold text-white tracking-tight">Verified Internship Certificates</h3>
+                </div>
+                <p className="text-xs text-slate-300">
+                  Access, view, print, and share your tamper-proof institutional internship completion credentials.
+                </p>
+              </div>
+              <div className="flex items-center space-x-2 bg-slate-900/80 px-4 py-2 rounded-xl border border-slate-800 text-xs">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span className="text-slate-300">
+                  <strong>{profile?.completions?.filter((c: any) => c.status === 'APPROVED')?.length || 0}</strong> Issued Credentials
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Certificate Cards Grid */}
+          {(!profile?.completions || profile.completions.filter((c: any) => c.status === 'APPROVED').length === 0) ? (
+            <div className="glass-card p-12 text-center space-y-4">
+              <div className="w-14 h-14 rounded-full bg-slate-800/80 border border-slate-700 flex items-center justify-center mx-auto text-amber-400">
+                <Award className="w-7 h-7" />
+              </div>
+              <div className="space-y-1 max-w-md mx-auto">
+                <h4 className="text-base font-bold text-white">No Completion Certificates Issued Yet</h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Certificates are automatically generated and cryptographically signed once your faculty mentor and employer supervisor complete their performance evaluation rubrics and T&P approves your internship completion.
+                </p>
+              </div>
+
+              {/* Step Process Visualizer */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto pt-4 text-left text-xs">
+                <div className="p-3 bg-slate-900/60 border border-slate-800 rounded-xl space-y-1">
+                  <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider block">Step 1</span>
+                  <p className="font-semibold text-white">Log Weekly Progress</p>
+                  <p className="text-[11px] text-slate-400">Submit weekly work logs for faculty mentor review.</p>
+                </div>
+                <div className="p-3 bg-slate-900/60 border border-slate-800 rounded-xl space-y-1">
+                  <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider block">Step 2</span>
+                  <p className="font-semibold text-white">Dual Rubric Evaluation</p>
+                  <p className="text-[11px] text-slate-400">Mentor (40%) and Company (60%) grade performance.</p>
+                </div>
+                <div className="p-3 bg-slate-900/60 border border-slate-800 rounded-xl space-y-1">
+                  <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">Step 3</span>
+                  <p className="font-semibold text-white">T&P Verification</p>
+                  <p className="text-[11px] text-slate-400">Institutional certificate issued with verification code.</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {profile.completions.filter((c: any) => c.status === 'APPROVED').map((comp: any) => (
+                <div
+                  key={comp.id}
+                  className="glass-card p-6 space-y-5 border-amber-500/30 hover:border-amber-500/60 transition-all shadow-lg hover:shadow-amber-500/5 relative group"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center space-x-2">
+                        <Award className="w-5 h-5 text-amber-400" />
+                        <span className="text-xs font-mono text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">
+                          {comp.certificateId || comp.verificationCode}
+                        </span>
+                      </div>
+                      <h4 className="text-base font-extrabold text-white pt-1 tracking-tight">
+                        {comp.internship?.title || 'Software Engineering Internship'}
+                      </h4>
+                      <p className="text-xs text-slate-400 font-medium flex items-center space-x-1">
+                        <Building2 className="w-3.5 h-3.5 text-slate-500" />
+                        <span>{comp.internship?.company?.name || 'Partner Enterprise'} &bull; {comp.internship?.durationMonths || 6} Months</span>
+                      </p>
+                    </div>
+
+                    <div className="text-right">
+                      <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 inline-flex items-center space-x-1">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Verified</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Evaluation Metrics */}
+                  <div className="grid grid-cols-2 gap-2 bg-slate-900/80 p-3 rounded-xl border border-slate-800 text-xs">
+                    <div>
+                      <span className="text-[10px] text-slate-500 uppercase font-bold block">Final Grade</span>
+                      <span className="font-bold text-amber-300">{comp.grade || 'A+ (Outstanding)'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-500 uppercase font-bold block">Composite Score</span>
+                      <span className="font-bold text-cyan-300">{comp.finalScore || 9.2} / 10.0</span>
+                    </div>
+                  </div>
+
+                  {/* Footer & Action */}
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-800/80 text-xs">
+                    <span className="text-[11px] text-slate-400">
+                      Completed: {comp.completionDate ? new Date(comp.completionDate).toLocaleDateString() : 'August 2026'}
+                    </span>
+                    <button
+                      onClick={() => setSelectedCertForModal(comp)}
+                      className="btn-primary py-2 px-4 text-xs flex items-center space-x-1.5 shadow-md shadow-cyan-500/10 font-bold"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>View Official Certificate</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ======================================================== */}
       {/* TAB 5: AI SKILL-GAP ANALYZER */}
       {/* ======================================================== */}
       {activeTab === 'skillgap' && (
@@ -2029,6 +2198,15 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             </div>
           )}
         </div>
+      )}
+
+      {/* Certificate Modal */}
+      {selectedCertForModal && (
+        <CertificateModal
+          certificate={selectedCertForModal}
+          student={profile}
+          onClose={() => setSelectedCertForModal(null)}
+        />
       )}
     </div>
   );

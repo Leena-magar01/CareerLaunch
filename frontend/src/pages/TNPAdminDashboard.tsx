@@ -92,6 +92,25 @@ export const TNPAdminDashboard: React.FC<TNPAdminDashboardProps> = ({
     fetchTNPData();
   }, []);
 
+  const handleDownloadDocument = async (docId: string, originalName: string) => {
+    try {
+      const res = await api.get(`/documents/${docId}/file`, { responseType: 'blob' });
+      const contentType = (res.headers['content-type'] as string) || 'application/pdf';
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: contentType }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', originalName || 'student_document.pdf');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => window.URL.revokeObjectURL(url), 10000);
+    } catch (err: any) {
+      const token = localStorage.getItem('token');
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
+      window.open(`${baseUrl}/documents/${docId}/file?token=${token}`, '_blank');
+    }
+  };
+
   const handleOpenReview = async (studentId: string) => {
     try {
       const res = await api.get(`/tnp/students/${studentId}/review`);
@@ -541,15 +560,13 @@ export const TNPAdminDashboard: React.FC<TNPAdminDashboardProps> = ({
                           <span className="text-[10px] text-slate-400">{doc.documentType} &bull; {(doc.size / 1024).toFixed(1)} KB</span>
                         </div>
                       </div>
-                      <a
-                        href={`http://localhost:5000/api/v1/documents/${doc.id}/file`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn-secondary text-[11px] py-1 px-3 flex items-center space-x-1"
+                      <button
+                        onClick={() => handleDownloadDocument(doc.id, doc.originalName)}
+                        className="btn-secondary text-[11px] py-1.5 px-3 flex items-center space-x-1.5 hover:text-cyan-300 font-semibold cursor-pointer"
                       >
                         <Download className="w-3.5 h-3.5" />
                         <span>View / Download</span>
-                      </a>
+                      </button>
                     </div>
                   ))}
                 </div>

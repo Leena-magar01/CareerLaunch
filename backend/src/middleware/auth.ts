@@ -11,12 +11,19 @@ export interface AuthRequest extends Request {
 }
 
 export const authenticateJwt = (req: AuthRequest, res: Response, next: NextFunction) => {
+  let token: string | undefined;
+
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
+  } else if (req.query && typeof req.query.token === 'string') {
+    token = req.query.token;
+  }
+
+  if (!token) {
     return res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'No token provided' } });
   }
 
-  const token = authHeader.split(' ')[1];
   try {
     const decoded = jwt.verify(token, ENV.JWT_SECRET) as { id: string; email: string; role: any };
     req.user = decoded;
